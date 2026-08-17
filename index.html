@@ -1,0 +1,1910 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CareFor · Multi-Modal AI Non-Invasive Diagnostic Suite (CIT Hackathon 2026)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%23F36914'/%3E%3Ctext x='32' y='43' font-family='Menlo,monospace' font-size='27' font-weight='700' fill='%23fff' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F6F8FB; 
+    --ink: #082752; 
+    --text: #232931;
+    --muted: #5A6A7E; 
+    --hair: #DAE1EB; 
+    --hair2: #C4D0E0;
+    --accent: #F36914; /* CIT Orange */
+    --accent-blue: #082752; /* CIT Dark Navy */
+    --accent-light-blue: #1858A4; 
+    --accent-green: #26915F;
+    --card: #FFFFFF;
+    --sans: "Poppins", system-ui, -apple-system, sans-serif;
+    --mono: "DM Mono", ui-monospace, Menlo, monospace;
+    --mgn: clamp(28px, 4.5vw, 85px);
+    --spine: clamp(18px, 3.2vw, 60px);
+    --padx: var(--mgn);
+    --padto: clamp(20px, 3vh, 40px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; }
+  body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: var(--sans);
+    overflow: hidden; 
+    -webkit-font-smoothing: antialiased; 
+  }
+
+  .deck { position: fixed; inset: 0; }
+  .s { 
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
+    padding: var(--padto) var(--mgn) clamp(30px, 4.5vh, 50px) calc(var(--spine) + clamp(20px, 2.8vw, 48px));
+    opacity: 0; visibility: hidden; transform: translateY(8px);
+    transition: opacity .55s ease, transform .65s cubic-bezier(.2,.7,.2,1), visibility .55s;
+  }
+  .s.on { opacity: 1; visibility: visible; transform: none; }
+  .wrap { width: 100%; max-width: 1600px; min-width: 0; display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+
+  .ac { color: var(--accent); } 
+  .ac-blue { color: var(--accent-blue); }
+  .dim { color: var(--muted); }
+
+  /* ---------- Spine & Progress Rail ---------- */
+  .spine { position: fixed; top: 0; bottom: 0; left: var(--spine); width: 2px; background: var(--hair2); z-index: 5; pointer-events: none; }
+  .spine .rail { position: absolute; top: 0; bottom: 0; left: -12px; width: 26px; pointer-events: auto; cursor: pointer; touch-action: none; }
+  .spine .node { 
+    position: absolute; top: 6%; left: -5px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent);
+    pointer-events: auto; cursor: grab; touch-action: none; z-index: 1; transition: top .65s cubic-bezier(.2,.7,.2,1), transform .16s ease;
+  }
+  .spine .node:hover { transform: scale(1.6); }
+  .spine.dragging .node { cursor: grabbing; transition: transform .16s ease; transform: scale(1.75); }
+  
+  body.on-divider { background: #082752; }
+  body.on-divider .spine { background: rgba(255,255,255,.2); } 
+  body.on-divider .spine .node { background: var(--accent); }
+  body.on-divider .cit-footer-line { color: rgba(255,255,255,0.7); }
+
+  .scrub-tip { 
+    position: fixed; left: calc(var(--spine) + 20px); transform: translateY(-50%);
+    background: var(--ink); color: #FFF; padding: 7px 12px; border-radius: 8px; white-space: nowrap;
+    font-family: var(--mono); font-size: 13px; line-height: 1.2; pointer-events: none; opacity: 0;
+    transition: opacity .14s ease; z-index: 60; box-shadow: 0 8px 26px -10px rgba(0,0,0,.4);
+  }
+  .scrub-tip.on { opacity: 1; }
+  .scrub-tip b { font-weight: 600; font-size: 14px; color: var(--accent); }
+  .scrub-tip .tt-ttl { display: block; margin-top: 3px; font-family: var(--sans); font-size: 12px; opacity: .85; }
+
+  /* ---------- Top-Right Page Numbers Hidden ---------- */
+  .top-page-no { display: none !important; }
+
+  .folio { 
+    position: fixed; top: clamp(14px, 2.2vh, 32px); right: var(--mgn); z-index: 4; pointer-events: none; user-select: none;
+    font-family: var(--mono); font-weight: 800; letter-spacing: -.02em; line-height: 1;
+    font-size: clamp(42px, 7.5vw, 110px); color: rgba(8, 39, 82, 0.04);
+  }
+
+  .kicker { 
+    font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: .18em;
+    font-size: clamp(11px, 0.9vw, 13.5px); display: inline-flex; align-items: center; color: var(--ink);
+  }
+  .kicker::before { content: ""; width: 22px; height: 3px; background: var(--accent); margin-right: 8px; flex: none; border-radius: 2px; }
+  .s .kicker { margin-bottom: 4px; }
+
+  h1 { font-weight: 700; letter-spacing: -.035em; line-height: .95; font-size: clamp(36px, 6vw, 88px); color: var(--ink); }
+  h2 { font-weight: 800; letter-spacing: -.03em; line-height: .98; font-size: clamp(26px, 3.5vw, 48px); color: var(--ink); }
+  .lead-q { margin-top: 4px; color: var(--muted); font-weight: 400; font-size: clamp(13px, 1.2vw, 18px); max-width: 80ch; line-height: 1.35; }
+
+  /* ---------- Slide 1: Official CIT Title Slide Template Style ---------- */
+  .s.cit-title-slide {
+    background: #FFFFFF;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    padding: clamp(18px, 3vh, 36px) clamp(24px, 5vw, 80px);
+  }
+
+  .cit-header-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    margin-bottom: 4px;
+  }
+  /* CIT Logo Sized Bigger Bolder & Prominent */
+  .cit-logo {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: clamp(70px, 9.5vh, 115px);
+    width: auto;
+    object-fit: contain;
+  }
+  .cit-college-title {
+    font-weight: 800;
+    color: #082752;
+    font-size: clamp(20px, 2.4vw, 32px);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+  .cit-college-sub {
+    font-size: clamp(11px, 1vw, 15px);
+    color: #4A5568;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .cit-dept-title {
+    font-weight: 800;
+    color: #082752;
+    font-size: clamp(14px, 1.6vw, 22px);
+    letter-spacing: 0.06em;
+    margin-top: clamp(10px, 1.5vh, 22px);
+    text-transform: uppercase;
+  }
+
+  .cit-main-title-box {
+    margin-top: clamp(8px, 1.2vh, 18px);
+  }
+  .cit-internal-txt {
+    font-weight: 800;
+    font-size: clamp(28px, 3.5vw, 52px);
+    color: #082752;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .cit-hackathon-txt {
+    font-weight: 800;
+    font-size: clamp(40px, 5.5vw, 82px);
+    color: #F36914;
+    letter-spacing: 0.02em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .cit-banner-solid {
+    background: #082752;
+    color: #FFFFFF;
+    padding: clamp(7px, 1.1vh, 12px) clamp(20px, 3.2vw, 44px);
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: clamp(12px, 1.3vw, 18px);
+    letter-spacing: 0.14em;
+    margin-top: clamp(12px, 1.8vh, 22px);
+    display: inline-block;
+    box-shadow: 0 5px 15px rgba(8,39,82,0.12);
+  }
+
+  .cit-banner-outline {
+    background: #EFF6FD;
+    border: 1.5px solid #C4D0E0;
+    color: #082752;
+    padding: clamp(5px, 0.9vh, 10px) clamp(16px, 2.5vw, 36px);
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: clamp(11px, 1.1vw, 15px);
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  .cit-carefor-subbanner {
+    margin-top: clamp(10px, 1.5vh, 18px);
+    background: rgba(243,105,20,0.08);
+    border: 1.5px solid rgba(243,105,20,0.3);
+    padding: 10px 24px;
+    border-radius: 12px;
+    display: inline-block;
+    max-width: 1080px;
+  }
+
+  .cit-dots-row {
+    display: flex;
+    justify-content: center;
+    gap: clamp(14px, 2.5vw, 36px);
+    margin-top: clamp(10px, 1.5vh, 20px);
+  }
+  .cit-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .cit-dot.orange { background: #F36914; }
+  .cit-dot.blue { background: #082752; }
+
+  /* ---------- Card Grid Styles ---------- */
+  .cit-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(16px, 2vw, 26px);
+    width: 100%;
+    flex: 1;
+    margin-top: clamp(12px, 1.8vh, 20px);
+    margin-bottom: clamp(12px, 1.8vh, 20px);
+  }
+
+  .cit-template-card {
+    background: #EFF6FD;
+    border-radius: 18px;
+    padding: clamp(18px, 1.8vw, 26px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: clamp(10px, 1.4vh, 16px);
+    box-shadow: 0 8px 24px -10px rgba(8,39,82,0.08);
+    border: 1.5px solid #DAE1EB;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  /* Color-coded left bar borders */
+  .cit-template-card.orange-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #F36914;
+  }
+  .cit-template-card.blue-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #1858A4;
+  }
+  .cit-template-card.green-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #26915F;
+  }
+  .cit-template-card.navy-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #082752;
+  }
+
+  .cit-card-header {
+    font-weight: 800;
+    font-size: clamp(15px, 1.4vw, 19px);
+    color: #082752;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .cit-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 1vh, 12px);
+    font-size: clamp(12.5px, 1.1vw, 15px);
+    color: #3B4A5A;
+    line-height: 1.4;
+  }
+  .cit-card-list b { color: #082752; font-weight: 700; }
+
+  /* Slide 3 Controlled Image Container */
+  .cit-card-img-box {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1.5px solid #DAE1EB;
+    background: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(8,39,82,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+  }
+  .cit-card-img-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* 4 Real-World Brand Logos Grid for Box 2 */
+  .brand-logo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .brand-logo-card {
+    background: #FFFFFF;
+    border: 1.5px solid #DAE1EB;
+    border-radius: 10px;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 3px 6px rgba(8,39,82,0.04);
+  }
+  .brand-logo-img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex: none;
+  }
+  .brand-logo-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .brand-logo-title {
+    font-weight: 700;
+    font-size: clamp(11.5px, 0.95vw, 13px);
+    color: #082752;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .brand-logo-sub {
+    font-size: clamp(9.5px, 0.8vw, 11px);
+    color: var(--muted);
+    line-height: 1.1;
+    margin-top: 2px;
+  }
+
+  .cit-one-liner-box {
+    width: 100%;
+    background: #EFF6FD;
+    border-radius: 16px;
+    padding: clamp(12px, 1.4vw, 18px) clamp(20px, 2vw, 32px);
+    border: 1.5px solid #DAE1EB;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 20px -10px rgba(8,39,82,0.08);
+  }
+  .cit-one-liner-box::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #082752;
+  }
+  .cit-one-liner-header {
+    font-weight: 800;
+    font-size: clamp(13px, 1.2vw, 16px);
+    color: #082752;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cit-one-liner-quote {
+    font-size: clamp(15px, 1.4vw, 20px);
+    font-weight: 600;
+    color: #082752;
+    margin-top: 4px;
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  /* Slide 4 Prominent Section Badges & Rich Bullet List */
+  .slide4-bullet-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: clamp(12.5px, 1.05vw, 14.5px);
+    color: #4A5568;
+    line-height: 1.35;
+  }
+  .slide4-bullet-list div {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .slide4-section-badge {
+    background: #FFFFFF;
+    border: 1.5px solid #DAE1EB;
+    border-radius: 12px;
+    padding: clamp(8px, 1vh, 14px) clamp(10px, 1vw, 14px);
+    margin-top: 8px;
+    box-shadow: 0 4px 10px rgba(8,39,82,0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .slide4-section-title {
+    font-weight: 800;
+    font-size: clamp(11px, 0.95vw, 12.5px);
+    color: #082752;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .slide4-section-text {
+    font-size: clamp(12.5px, 1.1vw, 14.5px);
+    font-weight: 600;
+    color: #2D3748;
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+
+  /* Slide 6 Well-Spaced Bullet Lists Filling Cards Completely */
+  .slide6-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 1.4vh, 16px);
+    font-size: clamp(13.5px, 1.15vw, 15.5px);
+    color: #3B4A5A;
+    line-height: 1.45;
+    margin-top: clamp(10px, 1.5vh, 18px);
+  }
+  .slide6-card-list div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .slide6-card-list b {
+    color: #082752;
+    font-weight: 700;
+    font-size: clamp(14px, 1.2vw, 16px);
+  }
+
+  /* Slide 7 Architecture Banner Styling */
+  .arch-img-banner {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFFFFF;
+    border: 1.5px solid #DAE1EB;
+    border-radius: 16px;
+    padding: 12px;
+    margin-top: 12px;
+    box-shadow: 0 8px 24px -10px rgba(8,39,82,0.1);
+    overflow: hidden;
+  }
+  .arch-img-banner img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+  }
+
+  /* Slide 8 Tech Stack & Tools Layout with Real Logos */
+  .ts-section-container {
+    background: #FFFFFF;
+    border-radius: 16px;
+    border: 1.5px solid #DAE1EB;
+    overflow: hidden;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 14px rgba(8,39,82,0.04);
+  }
+  .ts-section-header {
+    padding: 8px 18px;
+    font-weight: 800;
+    font-size: 13px;
+    color: #FFFFFF;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .ts-section-header.backend-bg { background: #26915F; }
+  .ts-section-header.frontend-bg { background: #1858A4; }
+  .ts-section-header.models-bg { background: #6B46C1; }
+
+  .ts-grid {
+    display: grid;
+    padding: 14px 18px;
+    gap: 16px;
+  }
+  .ts-grid-5 { grid-template-columns: repeat(5, 1fr); }
+  .ts-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .ts-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .ts-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 12px;
+    border-right: 1px solid #E2E8F0;
+  }
+  .ts-card:last-child { border-right: none; padding-right: 0; }
+
+  .ts-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ts-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex: none;
+    background: #EFF6FD;
+    border: 1px solid #DAE1EB;
+    overflow: hidden;
+    padding: 2px;
+  }
+  .ts-logo-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
+  }
+  .ts-title {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: #082752;
+    line-height: 1.2;
+  }
+  .ts-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: #26915F;
+    text-transform: uppercase;
+  }
+  .ts-desc {
+    font-size: 11.5px;
+    color: #4A5568;
+    line-height: 1.35;
+    margin-top: 3px;
+  }
+
+  /* Slide 9 Feasibility 2x2 Grid + Bottom Banner */
+  .feasibility-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(14px, 1.8vw, 22px);
+    width: 100%;
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+  .feasibility-card {
+    background: #FFFFFF;
+    border-radius: 18px;
+    padding: clamp(16px, 1.5vw, 24px);
+    border: 1.5px solid #DAE1EB;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(8,39,82,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .feasibility-card.blue-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #1858A4;
+  }
+  .feasibility-card.orange-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #F36914;
+  }
+  .feasibility-card.green-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #26915F;
+  }
+  .feasibility-header {
+    font-weight: 800;
+    font-size: clamp(15px, 1.3vw, 18px);
+    color: #082752;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .feasibility-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: clamp(12.5px, 1.05vw, 14.5px);
+    color: #3B4A5A;
+    line-height: 1.4;
+  }
+  .feasibility-list b { color: #082752; font-weight: 700; }
+
+  .impact-banner-box {
+    width: 100%;
+    background: #EFF6FD;
+    border-radius: 16px;
+    padding: clamp(12px, 1.4vw, 18px) clamp(20px, 2vw, 32px);
+    border: 1.5px solid #DAE1EB;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(8,39,82,0.05);
+  }
+  .impact-banner-box::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #F36914;
+  }
+  .impact-header {
+    font-weight: 800;
+    font-size: clamp(13px, 1.1vw, 15px);
+    color: #082752;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .impact-metrics-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    font-size: clamp(13px, 1.15vw, 15.5px);
+    color: #082752;
+    font-weight: 600;
+  }
+  .impact-metric-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .impact-metric-item b {
+    color: #F36914;
+    font-weight: 800;
+  }
+
+  /* Slide 10 Roadmap Styling */
+  .roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(14px, 1.6vw, 20px);
+    width: 100%;
+    margin-top: 14px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .roadmap-card {
+    background: #FFFFFF;
+    border-radius: 18px;
+    padding: clamp(16px, 1.5vw, 22px);
+    border: 1.5px solid #DAE1EB;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(8,39,82,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  .roadmap-card.orange-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #F36914;
+  }
+  .roadmap-card.blue-bar::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #1858A4;
+  }
+  .roadmap-stage-title {
+    font-weight: 800;
+    font-size: clamp(16px, 1.4vw, 20px);
+    color: #082752;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .roadmap-stage-sub {
+    font-weight: 700;
+    font-size: clamp(13.5px, 1.15vw, 16px);
+    color: #F36914;
+    margin-top: 2px;
+  }
+  .roadmap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: clamp(12px, 1.05vw, 14px);
+    color: #4A5568;
+    line-height: 1.4;
+    margin-top: 10px;
+  }
+  .roadmap-list b { color: #082752; font-weight: 700; }
+
+  .success-criteria-box {
+    width: 100%;
+    background: #EFF6FD;
+    border-radius: 16px;
+    padding: clamp(12px, 1.4vw, 18px) clamp(20px, 2vw, 32px);
+    border: 1.5px solid #DAE1EB;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(8,39,82,0.05);
+  }
+  .success-criteria-box::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #26915F;
+  }
+  .success-header {
+    font-weight: 800;
+    font-size: clamp(13px, 1.1vw, 15px);
+    color: #082752;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .success-list {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 6px;
+    font-size: clamp(12px, 1.05vw, 14px);
+    color: #2D3748;
+  }
+  .success-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .success-item b { color: #26915F; font-weight: 700; }
+
+  /* Slide 11: FULL VIEWPORT DIVIDER SLIDE "FROM PROBLEM TO IMPACT" */
+  .s.divider-slide {
+    position: absolute !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 0 !important;
+    background: #082752 !important; /* Pure Deep Blue Navy Edge-to-Edge */
+    color: #FFFFFF !important;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  .divider-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: clamp(160px, 20vw, 280px);
+    height: 8px;
+    background: #F36914;
+    z-index: 5;
+  }
+
+  .divider-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: clamp(180px, 22vw, 320px);
+    height: 8px;
+    background: #F36914;
+    z-index: 5;
+  }
+
+  .divider-title-text {
+    font-weight: 800;
+    font-size: clamp(36px, 5vw, 72px);
+    color: #FFFFFF;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: clamp(20px, 4vh, 45px);
+  }
+
+  .divider-blocks-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 1300px;
+    gap: clamp(30px, 4.5vw, 85px);
+    margin: auto 0;
+  }
+
+  /* Horizontal connecting orange line */
+  .divider-connect-line {
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    height: 4px;
+    background: #F36914;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .divider-block {
+    position: relative;
+    z-index: 2;
+    width: clamp(150px, 17vw, 230px);
+    height: clamp(150px, 17vw, 230px);
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.35);
+    transition: transform 0.3s ease;
+  }
+  .divider-block:hover { transform: translateY(-4px) scale(1.03); }
+
+  /* Block 1: Solid Orange Box */
+  .divider-block.orange-solid {
+    background: #F36914;
+    color: #FFFFFF;
+  }
+
+  /* Blocks 2, 3, 4: White Boxes with Navy Text */
+  .divider-block.white-box {
+    background: #FFFFFF;
+    color: #082752;
+  }
+
+  .divider-block-title {
+    font-weight: 800;
+    font-size: clamp(16px, 1.5vw, 22px);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .divider-block-desc {
+    font-size: clamp(10.5px, 0.9vw, 13px);
+    margin-top: 6px;
+    line-height: 1.25;
+    font-weight: 500;
+  }
+  .divider-block.orange-solid .divider-block-desc { color: rgba(255,255,255,0.95); }
+  .divider-block.white-box .divider-block-desc { color: #4A5568; }
+
+  .divider-footer-text {
+    font-family: var(--mono);
+    font-size: clamp(12px, 1.1vw, 15px);
+    color: #FFFFFF;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.9;
+    margin-bottom: clamp(16px, 2.5vh, 32px);
+  }
+
+  /* ---------- Slide 12: THANK YOU SLIDE (VIBRANT ROYAL ELECTRIC BLUE) ---------- */
+  .s.thankyou-slide {
+    position: absolute !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 0 !important;
+    background: #2B4CFF !important; /* Electric Royal Blue matching user's screenshot */
+    color: #FFFFFF !important;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .cit-footer-line {
+    position: fixed;
+    bottom: clamp(8px, 1.2vh, 16px);
+    left: calc(var(--spine) + clamp(20px, 2.8vw, 48px));
+    right: var(--mgn);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: clamp(10px, 0.95vw, 12px);
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    pointer-events: none;
+    z-index: 60;
+  }
+
+  /* ---------- Click-to-reveal Fragments ( > Symbol Supported) ---------- */
+  .frag { 
+    opacity: 0; transform: translateY(8px); 
+    transition: opacity .45s ease, transform .45s ease, border-color .4s ease, box-shadow .4s ease; 
+  }
+  .frag.shown { 
+    opacity: 1 !important; transform: none !important; 
+    border-color: var(--accent) !important; 
+    box-shadow: 0 6px 20px -10px rgba(243,105,20,0.22) !important; 
+  }
+  .s.on .frag:not(.shown) { opacity: 0; transform: translateY(8px); }
+
+  /* ---------- Bottom Progress Bar ---------- */
+  .prog { position: fixed; left: 0; bottom: 0; height: 4px; background: var(--accent); width: 0; transition: width .5s ease; z-index: 30; }
+
+  .s .wrap > * { opacity: 0; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease; }
+  .s.on .wrap > * { opacity: 1; transform: none; }
+  .s.on .wrap > *:nth-child(2) { transition-delay: .06s; }
+  .s.on .wrap > *:nth-child(3) { transition-delay: .12s; }
+  .s.on .wrap > *:nth-child(4) { transition-delay: .18s; }
+  .s.on .wrap > *:nth-child(5) { transition-delay: .24s; }
+</style>
+</head>
+<body>
+
+<div class="spine" id="spine">
+  <div class="rail" id="rail"></div>
+  <div class="node" id="node"></div>
+</div>
+<div class="scrub-tip" id="scrubTip"></div>
+<div class="folio" id="folio">01</div>
+<div class="prog" id="prog"></div>
+
+<div class="cit-footer-line">
+  <span>COIMBATORE INSTITUTE OF TECHNOLOGY &nbsp;|&nbsp; INTERNAL HACKATHON 2026</span>
+  <span id="footerPageNo">PAGE 01</span>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- ==================== SLIDE 1: Exact CIT Official Title Slide Layout ==================== -->
+  <section class="s cit-title-slide on" data-title="Title · CIT Internal Hackathon 2026">
+    <div class="wrap" style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%;justify-content:space-between">
+      
+      <!-- Top College Header with Logo (Bigger CIT Logo) -->
+      <div class="cit-header-box">
+        <img src="images/cit.png" alt="CIT College Logo" class="cit-logo">
+        <div>
+          <div class="cit-college-title">Coimbatore Institute of Technology</div>
+          <div class="cit-college-sub">(Government Aided Autonomous Institution affiliated to Anna University)</div>
+        </div>
+      </div>
+
+      <!-- Department Sub-header -->
+      <div class="cit-dept-title">
+        Department of Artificial Intelligence and Data Science
+      </div>
+
+      <!-- Main Title -->
+      <div class="cit-main-title-box">
+        <div class="cit-internal-txt">INTERNAL</div>
+        <div class="cit-hackathon-txt">HACKATHON 2026</div>
+      </div>
+
+      <!-- Banner Badges -->
+      <div>
+        <div class="cit-banner-solid">
+          INNOVATE &nbsp;•&nbsp; COLLABORATE &nbsp;•&nbsp; IMPACT
+        </div>
+      </div>
+      <div>
+        <div class="cit-banner-outline">
+          CIT CAMPUS &nbsp;|&nbsp; STUDENT INNOVATION &nbsp;|&nbsp; 2026
+        </div>
+      </div>
+
+      <!-- Project & Team Details Box -->
+      <div class="cit-carefor-subbanner">
+        <div style="font-weight:700;font-size:clamp(14px,1.5vw,20px);color:#082752">
+          Project: CareFor — Multi-Modal AI Non-Invasive Health & Diagnostic Suite
+        </div>
+        <div style="font-family:var(--mono);font-size:clamp(11px,0.95vw,13.5px);color:#4A5568;margin-top:4px;line-height:1.4">
+          <b>Team:</b> Valyrian Intelligence &nbsp;·&nbsp; <b>Members:</b> Hemkumar R · Illaya Bharathi · Lalanthika S · Raj Mohan B · Rithish Barath S R · Roshni Moomina S
+        </div>
+      </div>
+
+      <!-- Bottom Alternating Color Dots -->
+      <div class="cit-dots-row">
+        <div class="cit-dot orange"></div>
+        <div class="cit-dot blue"></div>
+        <div class="cit-dot orange"></div>
+        <div class="cit-dot blue"></div>
+        <div class="cit-dot orange"></div>
+        <div class="cit-dot blue"></div>
+        <div class="cit-dot orange"></div>
+        <div class="cit-dot blue"></div>
+        <div class="cit-dot orange"></div>
+        <div class="cit-dot blue"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 2: Refined Problem Statement ==================== -->
+  <section class="s" data-title="02 · The Challenge">
+    <div class="wrap">
+      
+      <div>
+        <div class="kicker">02 &nbsp; THE CHALLENGE</div>
+        <h2>The Challenge</h2>
+        <p class="lead-q">Define the problem clearly before presenting the technology.</p>
+      </div>
+
+      <!-- 3 Card Grid matching Template -->
+      <div class="cit-card-grid">
+        
+        <!-- Card 1: Problem Statement (Orange Bar) -->
+        <div class="cit-template-card orange-bar">
+          <div class="cit-card-header">PROBLEM STATEMENT</div>
+          <div class="cit-card-list">
+            <div>• <b>Access Barrier:</b> Routine health screening requires multiple specialized devices & clinical tests, making frequent checkups difficult in rural communities.</div>
+            <div>• <b>Unused Smartphone Sensors:</b> Smartphones capture rich camera, microphone, & motion data, but these signals are rarely combined for holistic screening.</div>
+            <div>• <b>Multi-Modal AI Gap:</b> Need an integrated AI system to fuse facial, eye, voice, & cough signals to track health baselines without extra devices.</div>
+          </div>
+        </div>
+
+        <!-- Card 2: Target Users (Blue Bar) -->
+        <div class="cit-template-card blue-bar frag">
+          <div class="cit-card-header">TARGET USERS</div>
+          <div class="cit-card-list">
+            <div>• <b>Beneficiaries:</b> Rural & low-resource populations, elderly individuals, chronic care patients, and remote workers.</div>
+            <div>• <b>Stakeholders:</b> Family caregivers, village health workers, doctors, campus clinics, & telemedicine providers.</div>
+            <div>• <b>Context / Location:</b> Primary healthcare centers, home care, and remote diagnostic screening.</div>
+          </div>
+        </div>
+
+        <!-- Card 3: Technical & Social Impact (Green Bar) -->
+        <div class="cit-template-card green-bar frag">
+          <div class="cit-card-header">TECHNICAL & SOCIAL IMPACT</div>
+          <div class="cit-card-list">
+            <div>• <b>$0 Extra Hardware Cost:</b> Turns any basic smartphone into a multi-modal health monitor without buying expensive medical devices.</div>
+            <div>• <b>Instant Universal Access:</b> Empowers rural communities & home patients to perform 1-minute non-invasive health checks anytime.</div>
+            <div>• <b>Early Risk Prevention:</b> Catches hidden warning signs in vitals, fatigue, stress, & breathing before emergencies occur.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Full-Width One-Liner Box (Navy Bar) -->
+      <div class="cit-one-liner-box frag">
+        <div class="cit-one-liner-header">PROBLEM IN ONE LINE</div>
+        <div class="cit-one-liner-quote">
+          “How might we fuse smartphone camera video, eye tracking, speech acoustics, and cough sound waves into a single AI app for instant, zero-cost health screening?”
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 3: The Gap Analysis ==================== -->
+  <section class="s" data-title="03 · Existing System & Gap">
+    <div class="wrap">
+      <div>
+        <div class="kicker">03 &nbsp; THE GAP</div>
+        <h2>Existing System & Gap Analysis</h2>
+        <p class="lead-q">Show what is already available and where the opportunity lies.</p>
+      </div>
+      
+      <div class="cit-card-grid">
+        
+        <!-- Card 1: CURRENT SITUATION -->
+        <div class="cit-template-card navy-bar" style="display:flex; flex-direction:column; justify-content:flex-start">
+          <div>
+            <div class="cit-card-header">CURRENT SITUATION</div>
+            <div class="cit-card-list">
+              <div>• <b>Everyday Gadget Reliance:</b> Users buy multiple small gadgets (Smartwatch, Pulse Oximeter, Stethoscope, Thermometer).</div>
+              <div>• <b>Replaces Small Gadgets:</b> CareFor replaces small personal gadgets with 1 smartphone app (Not replacing big ICU machines).</div>
+            </div>
+          </div>
+          
+          <div class="cit-card-img-box" style="flex:1; width:100%; margin-top:14px; padding:6px; border-radius:12px; background:#FFF">
+            <img src="images/Screenshot_2026-08-17_050005.png" alt="Personal Medical Devices" style="object-fit:contain; width:100%; height:100%; border-radius:8px">
+          </div>
+        </div>
+
+        <!-- Card 2: EXISTING APPROACH -->
+        <div class="cit-template-card blue-bar frag" style="display:flex; flex-direction:column; justify-content:flex-start">
+          <div>
+            <div class="cit-card-header">EXISTING APPROACH</div>
+            <div class="cit-card-list">
+              <div>• <b>Single-Signal Limit:</b> Current commercial solutions bias only on 1 isolated scan (e.g. Watch pulse or Eye tracking alone).</div>
+              <div>• <b>Unmet Need:</b> Requires combining all 4 non-invasive bio-scans into one unified suite.</div>
+            </div>
+          </div>
+          
+          <div class="brand-logo-grid" style="flex:1; margin-top:14px; gap:10px; grid-template-rows: 1fr 1fr">
+            <div class="brand-logo-card" style="height:100%; padding:8px 12px">
+              <img src="images/apple_watch.png" alt="Apple Health" class="brand-logo-img" style="width:34px; height:34px">
+              <div class="brand-logo-info">
+                <span class="brand-logo-title" style="font-size:13px">Apple Health</span>
+                <span class="brand-logo-sub" style="font-size:10.5px">Face / Watch Pulse</span>
+              </div>
+            </div>
+            <div class="brand-logo-card" style="height:100%; padding:8px 12px">
+              <img src="images/tobii.png" alt="Tobii AI" class="brand-logo-img" style="width:34px; height:34px">
+              <div class="brand-logo-info">
+                <span class="brand-logo-title" style="font-size:13px">Tobii AI</span>
+                <span class="brand-logo-sub" style="font-size:10.5px">Eye & Gaze Tracking</span>
+              </div>
+            </div>
+            <div class="brand-logo-card" style="height:100%; padding:8px 12px">
+              <img src="images/empatica.png" alt="Empatica E4" class="brand-logo-img" style="width:34px; height:34px">
+              <div class="brand-logo-info">
+                <span class="brand-logo-title" style="font-size:13px">Empatica E4</span>
+                <span class="brand-logo-sub" style="font-size:10.5px">Speech & Stress Bio</span>
+              </div>
+            </div>
+            <div class="brand-logo-card" style="height:100%; padding:8px 12px">
+              <img src="images/vitalo.jpg" alt="VitaloJAK" class="brand-logo-img" style="width:34px; height:34px">
+              <div class="brand-logo-info">
+                <span class="brand-logo-title" style="font-size:13px">VitaloJAK</span>
+                <span class="brand-logo-sub" style="font-size:10.5px">Cough Audio Monitor</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: UNMET NEED / CAREFOR GAP -->
+        <div class="cit-template-card orange-bar frag" style="display:flex; flex-direction:column; justify-content:flex-start">
+          <div>
+            <div class="cit-card-header">UNMET NEED (CAREFOR GAP)</div>
+            <div class="cit-card-list">
+              <div>• <b>CareFor Advantage:</b> Zero-hardware multi-modal camera + microphone AI diagnostic suite.</div>
+              <div>• <b>Holistic AI Fusion:</b> Fuses 4 diagnostic scans into 1 app for instant baseline health tracking.</div>
+            </div>
+          </div>
+          <div class="cit-card-img-box" style="flex:1; width:100%; margin-top:14px; padding:12px; border-color:var(--accent); background:#FFF">
+            <img src="images/logo.jpeg" alt="CareFor Official Brand Logo" style="width:100%; height:100%; object-fit:contain">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 4: Proposed Solution Ecosystem ==================== -->
+  <section class="s" data-title="04 · Multi-Modal Solution">
+    <div class="wrap">
+      <div>
+        <div class="kicker">04 &nbsp; OUR SOLUTION</div>
+        <h2>Proposed Solution</h2>
+        <p class="lead-q">Present the idea in one glance: input → intelligence → action → outcome.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:14px;flex:1">
+        
+        <!-- Track 1: Face Scan (rPPG) -->
+        <div class="cit-template-card orange-bar" style="justify-content:space-between">
+          <div>
+            <div class="cit-card-header" style="font-size:14px">TRACK 01 // CAMERA</div>
+            <div style="font-weight:800;font-size:18.5px;color:#082752;margin-top:2px">❤️ Face Scan</div>
+            <div class="slide4-bullet-list">
+              <div>• <b>Simple Camera Video:</b> Reads light absorption on facial skin.</div>
+              <div>• <b>Blood Pulse Tracking:</b> Captures micro skin color changes each heartbeat.</div>
+              <div>• <b>Vital Signs Output:</b> Calculates Pulse, SpO2 %, HRV & Respiration.</div>
+            </div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">📷 INPUT SENSOR</div>
+            <div class="slide4-section-text">Smartphone Camera</div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">⚙️ CORE TECH</div>
+            <div class="slide4-section-text" style="color:#F36914">Google MediaPipe + rPPG + DSP</div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">📊 OUTPUT VITALS</div>
+            <div class="slide4-section-text">Pulse Rate, SpO2 %, HRV, Breaths</div>
+          </div>
+        </div>
+
+        <!-- Track 2: Eye Scan -->
+        <div class="cit-template-card blue-bar frag" style="justify-content:space-between">
+          <div>
+            <div class="cit-card-header" style="font-size:14px">TRACK 02 // CAMERA</div>
+            <div style="font-weight:800;font-size:18.5px;color:#082752;margin-top:2px">👁️ Eye Scan</div>
+            <div class="slide4-bullet-list">
+              <div>• <b>Pupil & Iris Lock:</b> Focuses camera on upper face and eyes.</div>
+              <div>• <b>Blink & Gaze Tracking:</b> Measures eyelid closure speed and gaze hold.</div>
+              <div>• <b>Fatigue Scores:</b> Calculates Drowsiness % and Attention Focus %.</div>
+            </div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">📷 INPUT SENSOR</div>
+            <div class="slide4-section-text">Smartphone Camera</div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">⚙️ CORE TECH</div>
+            <div class="slide4-section-text" style="color:#1858A4">MediaPipe Iris Landmark Tracker</div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">📊 OUTPUT SCORES</div>
+            <div class="slide4-section-text">😴 Drowsiness % & 🎯 Focus Score %</div>
+          </div>
+        </div>
+
+        <!-- Track 3: Speech Scan -->
+        <div class="cit-template-card green-bar frag" style="justify-content:space-between">
+          <div>
+            <div class="cit-card-header" style="font-size:14px">TRACK 03 // MICROPHONE</div>
+            <div style="font-weight:800;font-size:18.5px;color:#082752;margin-top:2px">🎙️ Speech Scan</div>
+            <div class="slide4-bullet-list">
+              <div>• <b>5-Second Voice Record:</b> User speaks a short sentence into phone mic.</div>
+              <div>• <b>Vocal Tremble Analysis:</b> Filters room noise to measure pitch wobble.</div>
+              <div>• <b>Stress & Stability:</b> Scores vocal cord tension and lung airflow.</div>
+            </div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">🎙️ INPUT SENSOR</div>
+            <div class="slide4-section-text">Smartphone Microphone</div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">⚙️ CORE TECH</div>
+            <div class="slide4-section-text" style="color:#26915F">Voice VAD + Acoustic Pitch DSP</div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">📊 OUTPUT SCORES</div>
+            <div class="slide4-section-text">😰 Stress Level % & 🫁 Voice Stability</div>
+          </div>
+        </div>
+
+        <!-- Track 4: Cough Scan -->
+        <div class="cit-template-card navy-bar frag" style="justify-content:space-between">
+          <div>
+            <div class="cit-card-header" style="font-size:14px">TRACK 04 // MICROPHONE</div>
+            <div style="font-weight:800;font-size:18.5px;color:#082752;margin-top:2px">😮‍💨 Cough Scan</div>
+            <div class="slide4-bullet-list">
+              <div>• <b>2 Cough Bursts:</b> Captures cough sound waves into phone mic.</div>
+              <div>• <b>Sound Spectrograms:</b> Converts 1D audio into 2D frequency images.</div>
+              <div>• <b>Airway Classification:</b> Identifies Dry vs Wet cough & Airway Strain.</div>
+            </div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">🎙️ INPUT SENSOR</div>
+            <div class="slide4-section-text">Smartphone Microphone</div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">⚙️ CORE TECH</div>
+            <div class="slide4-section-text" style="color:#082752">Sound Spectrogram + Audio AI</div>
+          </div>
+          <div class="slide4-section-badge">
+            <div class="slide4-section-title">📊 OUTPUT SCORES</div>
+            <div class="slide4-section-text">🫁 Airway Strain % & 🌵 Dry / Wet</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 5: Technical Innovation (3 Pillars + Bottom Quote) ==================== -->
+  <section class="s" data-title="05 · Core Technical Innovation">
+    <div class="wrap">
+      <div>
+        <div class="kicker">05 &nbsp; CORE INNOVATION</div>
+         baseline health tracking.
+        <p class="lead-q">What makes CareFor uniquely breakthrough compared to traditional devices and single-signal apps.</p>
+      </div>
+
+      <!-- 3 Card Grid matching Template -->
+      <div class="cit-card-grid">
+        
+        <!-- Pillar 1: Zero Hardware Cost -->
+        <div class="cit-template-card orange-bar">
+          <div>
+            <div class="cit-card-header">PILLAR 01 // ACCESSIBILITY</div>
+            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">📱 $0 Extra Hardware</div>
+            <div class="cit-card-list" style="margin-top:12px">
+              <div>• <b>Standard Phone Sensors:</b> Uses built-in RGB camera & microphone only.</div>
+              <div>• <b>Replaces Small Gadgets:</b> Eliminates smartwatches, pulse oximeters, & digital stethoscopes.</div>
+              <div>• <b>Zero Cost Barrier:</b> 1-minute non-invasive screening accessible to anyone, anywhere.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 2: Multi-Modal Sensor Fusion -->
+        <div class="cit-template-card blue-bar frag">
+          <div>
+            <div class="cit-card-header">PILLAR 02 // MULTI-MODAL AI</div>
+            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">🔀 4-Scan AI Fusion</div>
+            <div class="cit-card-list" style="margin-top:12px">
+              <div>• <b>Full-Body Signal Fusion:</b> Fuses facial skin, eye gaze, speech acoustics, & cough audio.</div>
+              <div>• <b>Advanced AI Engines:</b> MediaPipe + rPPG + DSP + Audio Mel-Spectrogram CNN.</div>
+              <div>• <b>Holistic Baselines:</b> Tracks cardiac, respiratory, & neurological state together.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 3: Healio AI & Guardian Care -->
+        <div class="cit-template-card green-bar frag">
+          <div>
+            <div class="cit-card-header">PILLAR 03 // ACTIONABLE CARE</div>
+            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">🤖 Healio AI Assistant</div>
+            <div class="cit-card-list" style="margin-top:12px">
+              <div>• <b>Plain Health Guidance:</b> RAG medical chatbot translates numbers into easy advice.</div>
+              <div>• <b>Persistent Health Log:</b> Automatically tracks daily, weekly, & monthly vital trends.</div>
+              <div>• <b>Remote Guardian Alerts:</b> Notifies family & doctors if vital warning signs trigger.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Full-Width Innovation Summary Box -->
+      <div class="cit-one-liner-box frag">
+        <div class="cit-one-liner-header">INNOVATION IN ONE LINE</div>
+        <div class="cit-one-liner-quote">
+          “CareFor replaces multiple separate health gadgets by fusing camera video, eye tracking, voice acoustics, and cough sound waves into a single zero-cost, 1-minute AI screening app.”
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 6: Solution Workflow / How It Works ==================== -->
+  <section class="s" data-title="06 · Solution Workflow">
+    <div class="wrap">
+      <div>
+        <div class="kicker">06 &nbsp; SOLUTION WORKFLOW</div>
+        <h2>How It Works</h2>
+        <p class="lead-q">A simple end-to-end workflow: input → pre-process → intelligence → decision → output.</p>
+      </div>
+
+      <!-- 5 Stages Grid filling height completely -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:12px;margin-bottom:12px;flex:1">
+        
+        <!-- Stage 1: Input -->
+        <div class="cit-template-card orange-bar" style="padding: clamp(16px,1.5vw,22px); justify-content: space-between;">
+          <div>
+            <div class="cit-card-header" style="font-size:13px">01 // INPUT</div>
+            <div style="font-weight:800;font-size:clamp(17px,1.35vw,20px);color:#082752;margin-top:3px">📱 Sensor Capture</div>
+            <div class="slide6-card-list">
+              <div><b>• Camera Video:</b> Captures 30 FPS face video & upper-face eye close-up.</div>
+              <div><b>• Mic Audio:</b> 5s voice sample + 2 cough sound bursts.</div>
+              <div><b>• Zero Hardware:</b> Standard phone camera & mic ($0 cost).</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 2: Pre-Process -->
+        <div class="cit-template-card blue-bar frag" style="padding: clamp(16px,1.5vw,22px); justify-content: space-between;">
+          <div>
+            <div class="cit-card-header" style="font-size:13px">02 // PRE-PROCESS</div>
+            <div style="font-weight:800;font-size:clamp(17px,1.35vw,20px);color:#082752;margin-top:3px">⚙️ Signal Cleaning</div>
+            <div class="slide6-card-list">
+              <div><b>• MediaPipe:</b> Locks facial landmarks & tracks iris boundaries in real time.</div>
+              <div><b>• rPPG Filter:</b> POS optical model + Butterworth filter wipes motion noise.</div>
+              <div><b>• Audio VAD:</b> Strips room echoes & ambient background noise.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 3: Intelligence -->
+        <div class="cit-template-card green-bar frag" style="padding: clamp(16px,1.5vw,22px); justify-content: space-between;">
+          <div>
+            <div class="cit-card-header" style="font-size:13px">03 // INTELLIGENCE</div>
+            <div style="font-weight:800;font-size:clamp(17px,1.35vw,20px);color:#082752;margin-top:3px">🧮 Multi-Track AI</div>
+            <div class="slide6-card-list">
+              <div><b>• rPPG Engine:</b> Computes Pulse Rate, SpO2 %, HRV & Breaths/min.</div>
+              <div><b>• PERCLOS Model:</b> Measures eye closure ratio % & gaze speed.</div>
+              <div><b>• Acoustic AI:</b> Pitch trembles & audio CNN cough patterns.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 4: Decision -->
+        <div class="cit-template-card navy-bar frag" style="padding: clamp(16px,1.5vw,22px); justify-content: space-between;">
+          <div>
+            <div class="cit-card-header" style="font-size:13px">04 // DECISION</div>
+            <div style="font-weight:800;font-size:clamp(17px,1.35vw,20px);color:#082752;margin-top:3px">⚖️ Clinical Decision</div>
+            <div class="slide6-card-list">
+              <div><b>• Biomarker Fusion:</b> Combines vitals, fatigue, stress & cough strain.</div>
+              <div><b>• Risk Scoring:</b> Compares results against baseline thresholds.</div>
+              <div><b>• Early Alerts:</b> Flags vital drops before emergencies occur.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 5: Output -->
+        <div class="cit-template-card orange-bar frag" style="padding: clamp(16px,1.5vw,22px); justify-content: space-between;">
+          <div>
+            <div class="cit-card-header" style="font-size:13px">05 // OUTPUT</div>
+            <div style="font-weight:800;font-size:clamp(17px,1.35vw,20px);color:#082752;margin-top:3px">📊 Actionable Output</div>
+            <div class="slide6-card-list">
+              <div><b>• Vitals Dashboard:</b> Real-time visual display of all 4 scan results.</div>
+              <div><b>• Healio Chatbot:</b> Explains technical numbers in plain language.</div>
+              <div><b>• Medical Diary:</b> Saves trend log + sends remote guardian alerts.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Design Principle Banner -->
+      <div class="cit-one-liner-box frag">
+        <div class="cit-one-liner-header">DESIGN PRINCIPLE: MULTI-MODAL SENSOR FUSION & ZERO-COST ACCESSIBILITY</div>
+        <div class="cit-one-liner-quote" style="font-size:15.5px">
+          “By fusing smartphone camera video, eye tracking, speech acoustics, and cough sound waves into a single pipeline, CareFor turns any standard smartphone into a 1-minute non-invasive health screening tool.”
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 7: TECHNOLOGY AND SYSTEM ARCHITECTURE ==================== -->
+  <section class="s" data-title="07 · Technology and System Architecture">
+    <div class="wrap">
+      <div>
+        <div class="kicker">07 &nbsp; TECHNOLOGY AND SYSTEM ARCHITECTURE</div>
+        <h2>Technology and System Architecture</h2>
+        <p class="lead-q">From raw smartphone camera & mic frames to vital measurements, clinical decision scoring & Healio RAG AI.</p>
+      </div>
+
+      <!-- High-Res Generated System Architecture Diagram Banner -->
+      <div class="arch-img-banner">
+        <img src="images/carefor_unified_architecture.jpg" alt="Technology and System Architecture Diagram (Unified 4 Scans + FastAPI + Healio RAG AI)">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 8: TECH STACK & TOOLS ==================== -->
+  <section class="s" data-title="08 · Tech Stack & Tools">
+    <div class="wrap">
+      <div>
+        <div class="kicker">08 &nbsp; TECH STACK & TOOLS</div>
+        <h2>CareFor — Multi-Modal Technology Stack</h2>
+        <p class="lead-q">Unified stack powering 4-track AI signal ingestion, backend storage, and Healio RAG AI.</p>
+      </div>
+      
+      <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;justify-content:space-between">
+        
+        <!-- Section 1: BACKEND (Green Header Bar) -->
+        <div class="ts-section-container">
+          <div class="ts-section-header backend-bg">BACKEND</div>
+          <div class="ts-grid ts-grid-5">
+            
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box">
+                  <img src="images/fastapi.png" alt="FastAPI Logo" class="ts-logo-img">
+                </div>
+                <div>
+                  <div class="ts-title">REST API</div>
+                  <div class="ts-tag">(FASTAPI)</div>
+                </div>
+              </div>
+              <div class="ts-desc">High performance API framework for building scalable endpoints & WebSockets.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box">
+                  <img src="images/postgresql.png" alt="PostgreSQL Logo" class="ts-logo-img">
+                </div>
+                <div>
+                  <div class="ts-title">PostgreSQL</div>
+                </div>
+              </div>
+              <div class="ts-desc">Reliable relational database for secure and efficient medical data storage.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box">
+                  <img src="images/pydantic.png" alt="Pydantic Logo" class="ts-logo-img">
+                </div>
+                <div>
+                  <div class="ts-title">Pydantic</div>
+                </div>
+              </div>
+              <div class="ts-desc">Data validation & settings management using Python type hints.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box" style="background:#F3E8FF;color:#6B46C1">🧠</div>
+                <div>
+                  <div class="ts-title">LLM</div>
+                  <div class="ts-tag" style="color:#6B46C1">(RAG)</div>
+                </div>
+              </div>
+              <div class="ts-desc">Retrieval Augmented Generation for context-aware medical AI responses.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box">
+                  <img src="images/python.jpg" alt="Python Logo" class="ts-logo-img">
+                </div>
+                <div>
+                  <div class="ts-title">Python</div>
+                </div>
+              </div>
+              <div class="ts-desc">Core programming language powering logic, APIs, & PyTorch ML models.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: FRONTEND (Blue Header Bar) -->
+        <div class="ts-section-container frag">
+          <div class="ts-section-header frontend-bg">FRONTEND</div>
+          <div class="ts-grid ts-grid-3">
+            
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box">
+                  <img src="images/flutter.png" alt="Flutter Logo" class="ts-logo-img">
+                </div>
+                <div>
+                  <div class="ts-title">Flutter</div>
+                </div>
+              </div>
+              <div class="ts-desc">Cross-platform UI framework for building beautiful, fast mobile apps.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box">
+                  <img src="images/dart.jpg" alt="Dart Logo" class="ts-logo-img">
+                </div>
+                <div>
+                  <div class="ts-title">Dart</div>
+                </div>
+              </div>
+              <div class="ts-desc">Programming language optimized for building modern apps with Flutter.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box">
+                  <img src="images/and.png" alt="Android Logo" class="ts-logo-img">
+                </div>
+                <div>
+                  <div class="ts-title">Android SDK</div>
+                </div>
+              </div>
+              <div class="ts-desc">Target platform for delivering CareFor app with native camera & mic access.</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Section 3: AI & DIAGNOSTIC MODELS (Purple Header Bar) -->
+        <div class="ts-section-container frag">
+          <div class="ts-section-header models-bg">AI & DIAGNOSTIC MODELS</div>
+          <div class="ts-grid ts-grid-4">
+            
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box" style="background:#FFF3EB;color:#F36914">📈</div>
+                <div>
+                  <div class="ts-title">rPPG & Face Vitals</div>
+                </div>
+              </div>
+              <div class="ts-desc"><b>Google MediaPipe + POS/CHROM Model + FFT:</b> Skin ROI tracking & color channel filtering to extract Heart Rate (BPM), SpO2 %, & HRV.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box" style="background:#EFF6FD;color:#1858A4">👁️</div>
+                <div>
+                  <div class="ts-title">Eye Fatigue Model</div>
+                </div>
+              </div>
+              <div class="ts-desc"><b>MediaPipe Iris 468 Mesh + PERCLOS (ISO Standard):</b> Calculates eyelid closure ratio ≥ 80% shut & saccadic gaze velocity for Drowsiness % & Focus %.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box" style="background:#EBF7F0;color:#26915F">🎙️</div>
+                <div>
+                  <div class="ts-title">Speech Acoustic Model</div>
+                </div>
+              </div>
+              <div class="ts-desc"><b>Librosa VAD + Praat Pitch (F0) & Shimmer + OpenSMILE:</b> Extracts vocal micro-trembles, pitch stability, & MFCCs to compute Stress % & Voice Stability.</div>
+            </div>
+
+            <div class="ts-card">
+              <div class="ts-card-top">
+                <div class="ts-icon-box" style="background:#F3E8FF;color:#6B46C1">😮‍💨</div>
+                <div>
+                  <div class="ts-title">Cough Airway AI</div>
+                </div>
+              </div>
+              <div class="ts-desc"><b>STFT 2D Mel-Spectrogram + ResNet-18 Audio CNN:</b> Classifies 1D cough sound waves into Dry vs Wet mucus patterns & Airway Strain Score %.</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 9: FEASIBILITY & IMPACT ==================== -->
+  <section class="s" data-title="09 · Feasibility & Impact">
+    <div class="wrap">
+      <div>
+        <div class="kicker">09 &nbsp; FEASIBILITY & IMPACT</div>
+        <h2>From Prototype to Real World</h2>
+        <p class="lead-q">Show that the solution can be implemented, scaled and sustained.</p>
+      </div>
+
+      <!-- 2x2 Grid Layout matching official CIT Template screenshot -->
+      <div class="feasibility-grid">
+        
+        <!-- Card 1: TECHNICAL FEASIBILITY (Blue Bar) -->
+        <div class="feasibility-card blue-bar">
+          <div class="feasibility-header">TECHNICAL FEASIBILITY</div>
+          <div class="feasibility-list">
+            <div>• <b>Zero Extra Hardware:</b> Uses standard smartphone RGB camera & mic ($0 extra cost).</div>
+            <div>• <b>On-Device Processing:</b> MediaPipe & TFLite models run directly on mobile for fast, offline vital extraction.</div>
+            <div>• <b>Low-Bandwidth WebSockets:</b> Micro-second binary payloads transmit easily over 3G/4G/5G networks.</div>
+          </div>
+        </div>
+
+        <!-- Card 2: ECONOMIC FEASIBILITY (Orange Bar) -->
+        <div class="feasibility-card orange-bar frag">
+          <div class="feasibility-header">ECONOMIC FEASIBILITY</div>
+          <div class="feasibility-list">
+            <div>• <b>100% Free Health Check:</b> Eliminates costly lab tests & diagnostic gadget purchases.</div>
+            <div>• <b>Replaces 4 Devices:</b> Saves approx. ₹15,000 – ₹45,000 spent on smartwatches, oximeters, & stethoscopes.</div>
+            <div>• <b>Scalable Freemium Model:</b> Free personal screening; clinic SDK licensing & doctor dashboards.</div>
+          </div>
+        </div>
+
+        <!-- Card 3: SCALABILITY (Green Bar) -->
+        <div class="feasibility-card green-bar frag">
+          <div class="feasibility-header">SCALABILITY</div>
+          <div class="feasibility-list">
+            <div>• <b>Instant Global Rollout:</b> Zero hardware manufacturing or logistics friction; instantly downloadable app.</div>
+            <div>• <b>Regional Language Support:</b> Localized UI for Tamil, Hindi, & regional Indian languages.</div>
+            <div>• <b>Multi-Modal AI Growth:</b> Continuous model improvements with anonymized clinical feedback.</div>
+          </div>
+        </div>
+
+        <!-- Card 4: SUSTAINABILITY (Blue Bar) -->
+        <div class="feasibility-card blue-bar frag">
+          <div class="feasibility-header">SUSTAINABILITY</div>
+          <div class="feasibility-list">
+            <div>• <b>Lightweight Cloud Stack:</b> Efficient FastAPI backend with PostgreSQL & vectorized RAG storage.</div>
+            <div>• <b>Data Privacy Standards:</b> Adheres to HIPAA & ABDM digital health privacy guidelines.</div>
+            <div>• <b>Long-Term Preventative Habit:</b> Empowers families with daily habit building & remote guardian alerts.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Full-Width EXPECTED IMPACT Banner (Orange Bar) -->
+      <div class="impact-banner-box frag">
+        <div class="impact-header">EXPECTED IMPACT</div>
+        <div class="impact-metrics-row">
+          <div class="impact-metric-item">👥 <b>10M+</b> Rural & Urban Patients Benefited</div>
+          <div class="impact-metric-item">⚡ <b>1-Min</b> Instant Check vs 2-Hr Clinic Visit</div>
+          <div class="impact-metric-item">💰 <b>100% ($0)</b> Hardware Cost Savings</div>
+          <div class="impact-metric-item">🌍 <b>100%</b> Universal Smartphone Reach</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 10: IMPLEMENTATION & DEPLOYMENT ROADMAP ==================== -->
+  <section class="s" data-title="10 · Implementation & Deployment Roadmap">
+    <div class="wrap">
+      <div>
+        <div class="kicker">10 &nbsp; ROADMAP</div>
+        <h2>Implementation & Deployment Roadmap</h2>
+        <p class="lead-q">A practical roadmap shows how the prototype becomes a deployable solution.</p>
+      </div>
+
+      <!-- 4 Connected Timeline Stage Cards -->
+      <div class="roadmap-grid">
+        
+        <!-- Stage 1: NOW (Orange Bar) -->
+        <div class="roadmap-card orange-bar">
+          <div>
+            <div class="roadmap-stage-title">NOW</div>
+            <div class="roadmap-stage-sub">Prototype</div>
+            <div class="roadmap-list">
+              <div>• <b>App with Fused 4-Scan AI Features:</b> Working Flutter app with rPPG camera vital extraction & multi-modal fusion.</div>
+              <div>• <b>Active Integration:</b> Eye fatigue, Speech acoustic, & Cough AI engines in active pipeline.</div>
+            </div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:#F36914;font-weight:700;margin-top:10px">[Current capability]</div>
+        </div>
+
+        <!-- Stage 2: NEXT (Blue Bar) -->
+        <div class="roadmap-card blue-bar frag">
+          <div>
+            <div class="roadmap-stage-title">NEXT</div>
+            <div class="roadmap-stage-sub">Pilot</div>
+            <div class="roadmap-list">
+              <div>• <b>Campus & Clinic Testing:</b> Pilot testing integrated 4-scan suite with CIT students & local clinics.</div>
+              <div>• <b>Ground-Truth Benchmarks:</b> Validating camera & mic outputs against hospital vital monitors.</div>
+            </div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:#1858A4;font-weight:700;margin-top:10px">[Test with users]</div>
+        </div>
+
+        <!-- Stage 3: PHASE 2 (Blue Bar) -->
+        <div class="roadmap-card blue-bar frag">
+          <div>
+            <div class="roadmap-stage-title">PHASE 2</div>
+            <div class="roadmap-stage-sub">Deployment</div>
+            <div class="roadmap-list">
+              <div>• <b>Primary Health Centers:</b> Deploying CareFor app across rural healthcare centers & telemedicine kiosks.</div>
+              <div>• <b>Remote Guardian Network:</b> Automatic SMS & doctor alerts on vital drops.</div>
+            </div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:#1858A4;font-weight:700;margin-top:10px">[Operational rollout]</div>
+        </div>
+
+        <!-- Stage 4: FUTURE (Blue Bar) -->
+        <div class="roadmap-card blue-bar frag">
+          <div>
+            <div class="roadmap-stage-title">FUTURE</div>
+            <div class="roadmap-stage-sub">Scale</div>
+            <div class="roadmap-list">
+              <div>• <b>Global Telehealth SDK:</b> Packaging CareFor engine as an embeddable SDK plugin.</div>
+              <div>• <b>National EHR Integration:</b> ABDM & HIPAA compliance for digital records.</div>
+            </div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:#1858A4;font-weight:700;margin-top:10px">[Expansion / integration]</div>
+        </div>
+
+      </div>
+
+      <!-- Bottom SUCCESS CRITERIA Banner (Green Bar) -->
+      <div class="success-criteria-box frag">
+        <div class="success-header">SUCCESS CRITERIA</div>
+        <div class="success-list">
+          <div class="success-item"><b>Milestone 1:</b> Achieve ≥ 95% correlation with medical pulse oximeters across diverse skin tones.</div>
+          <div class="success-item"><b>Milestone 2:</b> Maintain sub-1-minute full 4-scan pipeline execution latency on mid-range phones.</div>
+          <div class="success-item"><b>Milestone 3:</b> Successfully complete 500+ patient pilot trials at CIT campus clinic & rural health centers.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 11: FULL VIEWPORT DIVIDER SLIDE "FROM PROBLEM TO IMPACT" ==================== -->
+  <section class="s divider-slide divider" data-title="11 · From Problem to Impact">
+    <!-- Top-left and bottom-right orange accent bars -->
+    <div class="divider-top-bar"></div>
+    <div class="divider-bottom-bar"></div>
+
+    <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding: clamp(40px, 5vh, 80px) clamp(40px, 5vw, 100px); position:relative; z-index:2">
+      
+      <!-- Main Centered White Title -->
+      <div class="divider-title-text">
+        FROM PROBLEM TO IMPACT
+      </div>
+
+      <!-- 4 Connected Blocks Row with CareFor Project Highlights -->
+      <div class="divider-blocks-container">
+        <div class="divider-connect-line"></div>
+
+        <!-- Block 1: Solid Orange Box -->
+        <div class="divider-block orange-solid">
+          <div class="divider-block-title">PROBLEM</div>
+          <div class="divider-block-desc">Unused sensors & costly gadgets</div>
+        </div>
+
+        <!-- Block 2: White Box -->
+        <div class="divider-block white-box frag">
+          <div class="divider-block-title">INNOVATION</div>
+          <div class="divider-block-desc">Zero-cost 4-scan AI signal fusion</div>
+        </div>
+
+        <!-- Block 3: White Box -->
+        <div class="divider-block white-box frag">
+          <div class="divider-block-title">PROTOTYPE</div>
+          <div class="divider-block-desc">App with fused 4-scan features</div>
+        </div>
+
+        <!-- Block 4: White Box -->
+        <div class="divider-block white-box frag">
+          <div class="divider-block-title">IMPACT</div>
+          <div class="divider-block-desc">10M+ patients & 100% savings</div>
+        </div>
+      </div>
+
+      <!-- Centered Footer Text -->
+      <div class="divider-footer-text">
+        VALYRIAN INTELLIGENCE &nbsp;|&nbsp; CIT INTERNAL HACKATHON 2026
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE 12: THANK YOU SLIDE (VIBRANT ROYAL ELECTRIC BLUE) ==================== -->
+  <section class="s thankyou-slide divider" data-title="12 · Thank You">
+    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:space-between; padding: clamp(40px, 6vh, 90px) clamp(40px, 6vw, 120px); position:relative; z-index:2">
+      
+      <!-- Left Content Column -->
+      <div style="display:flex; flex-direction:column; align-items:flex-start; justify-content:center; max-width:62%">
+        <div style="font-family:var(--sans); font-weight:700; font-size:clamp(12px, 1.1vw, 15px); color:#FFFFFF; letter-spacing:0.18em; text-transform:uppercase; opacity:0.85">
+          CAREFOR &nbsp;•&nbsp; PROJECT PRESENTATION
+        </div>
+        
+        <h1 style="font-size:clamp(64px, 8.5vw, 115px); font-weight:800; color:#FFFFFF; line-height:0.95; margin-top:12px; letter-spacing:-0.03em">
+          Thank You.
+        </h1>
+        
+        <div style="font-size:clamp(18px, 2.2vw, 28px); color:#FFFFFF; margin-top:20px; font-weight:400; line-height:1.3">
+          Empowering Lives Through Non-Invasive AI Healthcare.
+        </div>
+        
+        <div style="font-size:clamp(18px, 2.2vw, 28px); color:#FFFFFF; margin-top:6px; font-weight:700; line-height:1.3">
+          Questions & Answers
+        </div>
+      </div>
+
+      <!-- Right Logo Card Box -->
+      <div style="width:clamp(220px, 24vw, 330px); height:clamp(220px, 24vw, 330px); border-radius:32px; background:#FFFFFF; display:flex; align-items:center; justify-content:center; padding:clamp(24px, 2.5vw, 40px); box-shadow:0 20px 50px rgba(0,0,0,0.3); flex:none">
+        <img src="images/logo.jpeg" alt="CareFor Official Brand Logo" style="width:100%; height:100%; object-fit:contain">
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script>
+  (function(){
+    const deck = document.getElementById('deck');
+    const slides = Array.from(deck.querySelectorAll('.s'));
+    const folio = document.getElementById('folio');
+    const footerPageNo = document.getElementById('footerPageNo');
+    const prog = document.getElementById('prog');
+    const node = document.getElementById('node');
+    const spine = document.getElementById('spine');
+    const scrubTip = document.getElementById('scrubTip');
+    const rail = document.getElementById('rail');
+    
+    let cur = 0;
+    const tot = slides.length;
+
+    function updateSlide(idx) {
+      if (idx < 0) idx = 0;
+      if (idx >= tot) idx = tot - 1;
+      
+      slides.forEach((s, i) => {
+        if (i === idx) {
+          s.classList.add('on');
+        } else {
+          s.classList.remove('on');
+        }
+      });
+
+      cur = idx;
+      const numStr = String(cur + 1).padStart(2, '0');
+      
+      folio.textContent = numStr;
+      if (footerPageNo) footerPageNo.textContent = 'PAGE ' + numStr;
+      prog.style.width = ((cur + 1) / tot * 100) + '%';
+      
+      const pct = (cur / (tot - 1)) * 88 + 6;
+      node.style.top = pct + '%';
+
+      if (slides[cur].classList.contains('divider-slide') || slides[cur].classList.contains('thankyou-slide') || slides[cur].classList.contains('divider')) {
+        document.body.classList.add('on-divider');
+      } else {
+        document.body.classList.remove('on-divider');
+      }
+    }
+
+    // Stepwise Fragment Reveal using > (Right Arrow or Space)
+    function revealNextFragment() {
+      const activeSlide = slides[cur];
+      const unrevealed = activeSlide.querySelectorAll('.frag:not(.shown)');
+      if (unrevealed.length > 0) {
+        unrevealed[0].classList.add('shown');
+        return true;
+      }
+      return false;
+    }
+
+    function hideLastFragment() {
+      const activeSlide = slides[cur];
+      const revealedList = activeSlide.querySelectorAll('.frag.shown');
+      if (revealedList.length > 0) {
+        revealedList[revealedList.length - 1].classList.remove('shown');
+        return true;
+      }
+      return false;
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === '>') {
+        e.preventDefault();
+        if (!revealNextFragment()) {
+          updateSlide(cur + 1);
+        }
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === '<') {
+        e.preventDefault();
+        if (!hideLastFragment()) {
+          updateSlide(cur - 1);
+        }
+      } else if (e.key === 'Home') {
+        updateSlide(0);
+      } else if (e.key === 'End') {
+        updateSlide(tot - 1);
+      }
+    });
+
+    // Touch & Click Support
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#spine') || e.target.closest('.rail')) return;
+      if (e.clientX > window.innerWidth * 0.75) {
+        if (!revealNextFragment()) updateSlide(cur + 1);
+      } else if (e.clientX < window.innerWidth * 0.25) {
+        if (!hideLastFragment()) updateSlide(cur - 1);
+      }
+    });
+
+    updateSlide(0);
+  })();
+</script>
+
+</body>
+</html>
