@@ -46,7 +46,7 @@
     transition: opacity .55s ease, transform .65s cubic-bezier(.2,.7,.2,1), visibility .55s;
   }
   .s.on { opacity: 1; visibility: visible; transform: none; }
-  .wrap { width: 100%; max-width: 1600px; min-width: 0; display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+  .wrap { width: 100%; max-width: 1600px; min-width: 0; display: flex; flex-direction: column; height: 100%; justify-content: flex-start; gap: 0; }
 
   .ac { color: var(--accent); } 
   .ac-blue { color: var(--accent-blue); }
@@ -221,23 +221,30 @@
     gap: clamp(16px, 2vw, 26px);
     width: 100%;
     flex: 1;
-    margin-top: clamp(12px, 1.8vh, 20px);
-    margin-bottom: clamp(12px, 1.8vh, 20px);
+    margin-top: 0 !important;
+    margin-bottom: clamp(10px, 1.5vh, 18px);
   }
 
   .cit-template-card {
     background: #EFF6FD;
-    border-radius: 18px;
-    padding: clamp(18px, 1.8vw, 26px);
+    border-radius: 20px;
+    padding: clamp(20px, 2.2vw, 32px);
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    gap: clamp(10px, 1.4vh, 16px);
+    justify-content: space-between;
+    gap: clamp(12px, 1.6vh, 20px);
     box-shadow: 0 8px 24px -10px rgba(8,39,82,0.08);
     border: 1.5px solid #DAE1EB;
     position: relative;
     overflow: hidden;
     height: 100%;
+  }
+
+  .cit-template-card > div:first-child {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
   }
 
   /* Color-coded left bar borders */
@@ -256,19 +263,32 @@
 
   .cit-card-header {
     font-weight: 800;
-    font-size: clamp(15px, 1.4vw, 19px);
+    font-size: clamp(16.5px, 1.45vw, 20.5px);
     color: #082752;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
+    padding-bottom: clamp(6px, 0.9vh, 10px);
+    border-bottom: 2px solid rgba(8,39,82,0.1);
+    margin-bottom: clamp(6px, 1vh, 12px);
   }
 
   .cit-card-list {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: clamp(6px, 1vh, 12px);
-    font-size: clamp(12.5px, 1.1vw, 15px);
-    color: #3B4A5A;
-    line-height: 1.4;
+    justify-content: space-between;
+    gap: clamp(10px, 1.6vh, 18px);
+    font-size: clamp(14px, 1.25vw, 17px);
+    color: #2D3748;
+    line-height: 1.5;
+  }
+  .cit-card-list > div {
+    background: #FFFFFF;
+    border: 1.5px solid #DAE1EB;
+    border-radius: 12px;
+    padding: clamp(10px, 1.3vh, 16px) clamp(12px, 1.3vw, 18px);
+    box-shadow: 0 4px 12px rgba(8,39,82,0.04);
+    line-height: 1.5;
   }
   .cit-card-list b { color: #082752; font-weight: 700; }
 
@@ -366,28 +386,232 @@
     line-height: 1.35;
   }
 
+  /* Slide 4 Video Container & Layout (Video Left + 4 Cards Straight Line Right) */
+  .slide4-layout {
+    display: flex;
+    gap: clamp(14px, 1.5vw, 22px);
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin-top: 0;
+    margin-bottom: clamp(12px, 1.5vh, 20px);
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .slide4-video-box {
+    width: clamp(260px, 22vw, 320px);
+    flex: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 10px 30px -10px rgba(8,39,82,0.18);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;
+    height: 100%;
+  }
+  .s.on .slide4-video-box {
+    opacity: 1;
+    transform: none;
+  }
+
+  .slide4-video-el {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 18px;
+    border: none;
+    outline: none;
+  }
+
+  /* Slide 4 Accordion Track Lines Layout */
+  .slide4-accordion {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .slide4-track-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    transition: flex 0.55s cubic-bezier(0.65, 0, 0.35, 1), transform 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Collapsed Strip Line State */
+  .slide4-track-item:not(.active) {
+    flex: 0 0 52px;
+    background: #EFF6FD;
+    border: 1.5px solid #DAE1EB;
+    box-shadow: 0 4px 12px rgba(8,39,82,0.04);
+  }
+
+  .slide4-track-item:not(.active):hover {
+    background: #E2EFFC;
+    transform: translateY(-2px);
+  }
+
+  /* Color-coded left bar borders for collapsed strips */
+  .slide4-track-item.orange-bar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #F36914; z-index: 10; }
+  .slide4-track-item.blue-bar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #1858A4; z-index: 10; }
+  .slide4-track-item.green-bar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #26915F; z-index: 10; }
+  .slide4-track-item.navy-bar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #082752; z-index: 10; }
+
+  .slide4-track-item.active::before {
+    display: none;
+  }
+
+  /* Collapsed Strip Label (vertical text) */
+  .slide4-strip-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px 0;
+    gap: 16px;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    z-index: 15;
+  }
+
+  .slide4-track-item.active .slide4-strip-label {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .slide4-strip-num {
+    font-family: var(--mono);
+    font-weight: 800;
+    font-size: 16px;
+    color: #082752;
+  }
+
+  .slide4-strip-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 12.5px;
+    letter-spacing: 0.14em;
+    color: #082752;
+    white-space: nowrap;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  /* Expanded Active Card State */
+  .slide4-track-item.active {
+    flex: 1;
+    cursor: default;
+    background: transparent;
+  }
+
+  .slide4-card-content {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between !important;
+    padding: clamp(20px, 2vw, 30px) !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease 0.15s;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .slide4-card-content > div:first-child {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    min-height: 0;
+  }
+
+  .slide4-track-item.active .slide4-card-content {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Color block wipe left animation overlay on track expansion */
+  .slide4-track-item::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #082752;
+    z-index: 60;
+    pointer-events: none;
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .slide4-track-item.orange-bar::after { background: #F36914; }
+  .slide4-track-item.blue-bar::after { background: #1858A4; }
+  .slide4-track-item.green-bar::after { background: #26915F; }
+  .slide4-track-item.navy-bar::after { background: #082752; }
+
+  .slide4-track-item.just-expanded::after {
+    animation: wipeLeftAnim 0.65s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+  }
+
+  @keyframes wipeLeftAnim {
+    0% { transform: scaleX(1); }
+    100% { transform: scaleX(0); }
+  }
+
   /* Slide 4 Prominent Section Badges & Rich Bullet List */
   .slide4-bullet-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 6px;
-    font-size: clamp(12.5px, 1.05vw, 14.5px);
-    color: #4A5568;
-    line-height: 1.35;
+    justify-content: space-between;
+    flex: 1;
+    gap: clamp(8px, 1.1vh, 14px);
+    margin-top: 8px;
+    font-size: clamp(15px, 1.2vw, 18px);
+    color: #2D3748;
+    line-height: 1.45;
+    min-height: 0;
   }
   .slide4-bullet-list div {
     display: flex;
-    align-items: flex-start;
-    gap: 6px;
+    align-items: center;
+    flex: 1;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1.5px solid #DAE1EB;
+    border-radius: 12px;
+    padding: clamp(10px, 1.2vh, 16px) clamp(14px, 1.4vw, 20px);
+    box-shadow: 0 4px 10px rgba(8,39,82,0.03);
   }
 
   .slide4-section-badge {
     background: #FFFFFF;
     border: 1.5px solid #DAE1EB;
-    border-radius: 12px;
-    padding: clamp(8px, 1vh, 14px) clamp(10px, 1vw, 14px);
-    margin-top: 8px;
+    border-radius: 14px;
+    padding: clamp(10px, 1.2vh, 14px) clamp(12px, 1.2vw, 16px);
     box-shadow: 0 4px 10px rgba(8,39,82,0.04);
     display: flex;
     flex-direction: column;
@@ -395,38 +619,130 @@
   }
   .slide4-section-title {
     font-weight: 800;
-    font-size: clamp(11px, 0.95vw, 12.5px);
+    font-size: clamp(12px, 0.95vw, 13.5px);
     color: #082752;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
   }
   .slide4-section-text {
-    font-size: clamp(12.5px, 1.1vw, 14.5px);
-    font-weight: 600;
+    font-size: clamp(15px, 1.2vw, 18px);
+    font-weight: 700;
     color: #2D3748;
     margin-top: 2px;
-    line-height: 1.3;
+    line-height: 1.35;
   }
+
+  /* ---------- Research Evidence Table Slide Styles ---------- */
+  .research-table-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin-top: clamp(8px, 1vh, 14px);
+    margin-bottom: clamp(10px, 1.2vh, 18px);
+    gap: clamp(10px, 1.2vh, 16px);
+    justify-content: space-between;
+  }
+
+  .research-table-header {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    gap: 16px;
+    padding: 12px 24px;
+    background: #082752;
+    color: #FFFFFF;
+    border-radius: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(8,39,82,0.12);
+  }
+
+  .research-table-row {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    gap: 16px;
+    align-items: center;
+    padding: clamp(14px, 1.6vh, 20px) 24px;
+    background: #EFF6FD;
+    border: 1.5px solid #DAE1EB;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(8,39,82,0.03);
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .research-table-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(8,39,82,0.08);
+  }
+
+  .research-table-row.orange-bar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #F36914; }
+  .research-table-row.blue-bar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #1858A4; }
+  .research-table-row.green-bar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #26915F; }
+  .research-table-row.navy-bar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #082752; }
+
+  .research-modality {
+    font-weight: 800;
+    font-size: clamp(16px, 1.25vw, 19px);
+    color: #082752;
+  }
+
+  .research-shows {
+    font-size: clamp(14.5px, 1.1vw, 17px);
+    color: #2D3748;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .research-approach {
+    background: #FFFFFF;
+    border: 1.5px solid #DAE1EB;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: clamp(13.5px, 1.05vw, 15.5px);
+    font-weight: 800;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(8,39,82,0.04);
+  }
+
+  .research-approach.orange { color: #F36914; border-color: rgba(243,105,20,0.3); }
+  .research-approach.blue { color: #1858A4; border-color: rgba(24,88,164,0.3); }
+  .research-approach.green { color: #26915F; border-color: rgba(38,145,95,0.3); }
+  .research-approach.navy { color: #082752; border-color: rgba(8,39,82,0.3); }
 
   /* Slide 6 Well-Spaced Bullet Lists Filling Cards Completely */
   .slide6-card-list {
+    flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: clamp(10px, 1.4vh, 16px);
-    font-size: clamp(13.5px, 1.15vw, 15.5px);
-    color: #3B4A5A;
-    line-height: 1.45;
+    font-size: clamp(14px, 1.2vw, 16.5px);
+    color: #2D3748;
+    line-height: 1.5;
     margin-top: clamp(10px, 1.5vh, 18px);
   }
-  .slide6-card-list div {
+  .slide6-card-list > div {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    background: #FFFFFF;
+    border: 1.5px solid #DAE1EB;
+    border-radius: 10px;
+    padding: clamp(8px, 1.1vh, 14px) clamp(10px, 1vw, 14px);
+    box-shadow: 0 2px 8px rgba(8,39,82,0.03);
   }
   .slide6-card-list b {
     color: #082752;
     font-weight: 700;
-    font-size: clamp(14px, 1.2vw, 16px);
+    font-size: clamp(14.5px, 1.25vw, 17px);
   }
 
   /* Slide 7 Architecture Banner Styling */
@@ -541,20 +857,22 @@
     grid-template-columns: 1fr 1fr;
     gap: clamp(14px, 1.8vw, 22px);
     width: 100%;
-    margin-top: 12px;
+    margin-top: 0 !important;
     margin-bottom: 12px;
+    flex: 1;
   }
   .feasibility-card {
     background: #FFFFFF;
     border-radius: 18px;
-    padding: clamp(16px, 1.5vw, 24px);
+    padding: clamp(18px, 1.8vw, 26px);
     border: 1.5px solid #DAE1EB;
     position: relative;
     overflow: hidden;
     box-shadow: 0 6px 18px rgba(8,39,82,0.05);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    justify-content: space-between;
+    height: 100%;
   }
   .feasibility-card.blue-bar::before {
     content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #1858A4;
@@ -567,18 +885,29 @@
   }
   .feasibility-header {
     font-weight: 800;
-    font-size: clamp(15px, 1.3vw, 18px);
+    font-size: clamp(16px, 1.35vw, 19.5px);
     color: #082752;
     letter-spacing: 0.03em;
     text-transform: uppercase;
+    padding-bottom: clamp(6px, 0.8vh, 10px);
+    border-bottom: 2px solid rgba(8,39,82,0.08);
   }
   .feasibility-list {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    font-size: clamp(12.5px, 1.05vw, 14.5px);
-    color: #3B4A5A;
-    line-height: 1.4;
+    justify-content: space-between;
+    gap: clamp(10px, 1.4vh, 16px);
+    font-size: clamp(13.5px, 1.15vw, 16px);
+    color: #2D3748;
+    line-height: 1.5;
+    margin-top: 10px;
+  }
+  .feasibility-list > div {
+    background: #EFF6FD;
+    border: 1px solid #DAE1EB;
+    border-radius: 10px;
+    padding: clamp(8px, 1.1vh, 14px) clamp(10px, 1vw, 14px);
   }
   .feasibility-list b { color: #082752; font-weight: 700; }
 
@@ -627,9 +956,10 @@
     grid-template-columns: repeat(4, 1fr);
     gap: clamp(14px, 1.6vw, 20px);
     width: 100%;
-    margin-top: 14px;
+    margin-top: 0 !important;
     margin-bottom: 14px;
     position: relative;
+    flex: 1;
   }
   .roadmap-card {
     background: #FFFFFF;
@@ -643,6 +973,12 @@
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
+  }
+  .roadmap-card > div:first-child {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
   }
   .roadmap-card.orange-bar::before {
     content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #F36914;
@@ -664,13 +1000,21 @@
     margin-top: 2px;
   }
   .roadmap-list {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    font-size: clamp(12px, 1.05vw, 14px);
-    color: #4A5568;
-    line-height: 1.4;
+    justify-content: space-between;
+    gap: clamp(8px, 1.2vh, 14px);
+    font-size: clamp(13px, 1.1vw, 15px);
+    color: #2D3748;
+    line-height: 1.45;
     margin-top: 10px;
+  }
+  .roadmap-list > div {
+    background: #EFF6FD;
+    border: 1px solid #DAE1EB;
+    border-radius: 10px;
+    padding: clamp(8px, 1vh, 12px) clamp(10px, 1vw, 14px);
   }
   .roadmap-list b { color: #082752; font-weight: 700; }
 
@@ -874,17 +1218,99 @@
     z-index: 60;
   }
 
+  /* ---------- Card Filled Color Wipe-Left Reveal Animation ---------- */
+  .cit-template-card,
+  .feasibility-card,
+  .roadmap-card,
+  .ts-card,
+  .ts-section-container,
+  .cit-one-liner-box,
+  .impact-banner-box,
+  .success-criteria-box,
+  .divider-block {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cit-template-card::after,
+  .feasibility-card::after,
+  .roadmap-card::after,
+  .ts-card::after,
+  .ts-section-container::after,
+  .cit-one-liner-box::after,
+  .impact-banner-box::after,
+  .success-criteria-box::after,
+  .divider-block::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #082752;
+    z-index: 50;
+    pointer-events: none;
+    transform: scaleX(1);
+    transform-origin: left center;
+    transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+  }
+
+  /* Color-coded filled overlays matching card theme */
+  .orange-bar::after { background: #F36914; }
+  .blue-bar::after { background: #1858A4; }
+  .green-bar::after { background: #26915F; }
+  .navy-bar::after { background: #082752; }
+  .backend-bg::after { background: #26915F; }
+  .frontend-bg::after { background: #1858A4; }
+  .models-bg::after { background: #6B46C1; }
+  .white-box::after { background: #082752; }
+
+  /* Trigger wipe-left when slide is active and card is revealed */
+  .s.on .cit-template-card:not(.frag)::after,
+  .s.on .cit-template-card.shown::after,
+  .s.on .feasibility-card:not(.frag)::after,
+  .s.on .feasibility-card.shown::after,
+  .s.on .roadmap-card:not(.frag)::after,
+  .s.on .roadmap-card.shown::after,
+  .s.on .ts-card:not(.frag)::after,
+  .s.on .ts-card.shown::after,
+  .s.on .ts-section-container:not(.frag)::after,
+  .s.on .ts-section-container.shown::after,
+  .s.on .cit-one-liner-box:not(.frag)::after,
+  .s.on .cit-one-liner-box.shown::after,
+  .s.on .impact-banner-box:not(.frag)::after,
+  .s.on .impact-banner-box.shown::after,
+  .s.on .success-criteria-box:not(.frag)::after,
+  .s.on .success-criteria-box.shown::after,
+  .s.on .divider-block:not(.frag)::after,
+  .s.on .divider-block.shown::after {
+    transform: scaleX(0);
+  }
+
+  /* Staggered wipe-left delays for grid cards on active slide */
+  .s.on .cit-card-grid > *:nth-child(1):not(.frag)::after { transition-delay: 0.08s; }
+  .s.on .cit-card-grid > *:nth-child(2):not(.frag)::after { transition-delay: 0.24s; }
+  .s.on .cit-card-grid > *:nth-child(3):not(.frag)::after { transition-delay: 0.40s; }
+  .s.on .cit-card-grid > *:nth-child(4):not(.frag)::after { transition-delay: 0.56s; }
+
+  .s.on .feasibility-grid > *:nth-child(1):not(.frag)::after { transition-delay: 0.08s; }
+  .s.on .feasibility-grid > *:nth-child(2):not(.frag)::after { transition-delay: 0.24s; }
+  .s.on .feasibility-grid > *:nth-child(3):not(.frag)::after { transition-delay: 0.40s; }
+  .s.on .feasibility-grid > *:nth-child(4):not(.frag)::after { transition-delay: 0.50s; }
+
+  .s.on .roadmap-grid > *:nth-child(1):not(.frag)::after { transition-delay: 0.08s; }
+  .s.on .roadmap-grid > *:nth-child(2):not(.frag)::after { transition-delay: 0.24s; }
+  .s.on .roadmap-grid > *:nth-child(3):not(.frag)::after { transition-delay: 0.40s; }
+  .s.on .roadmap-grid > *:nth-child(4):not(.frag)::after { transition-delay: 0.50s; }
+
   /* ---------- Click-to-reveal Fragments ( > Symbol Supported) ---------- */
   .frag { 
-    opacity: 0; transform: translateY(8px); 
-    transition: opacity .45s ease, transform .45s ease, border-color .4s ease, box-shadow .4s ease; 
+    opacity: 0;
+    transition: opacity .1s ease, border-color .4s ease, box-shadow .4s ease; 
   }
   .frag.shown { 
-    opacity: 1 !important; transform: none !important; 
+    opacity: 1 !important;
     border-color: var(--accent) !important; 
     box-shadow: 0 6px 20px -10px rgba(243,105,20,0.22) !important; 
   }
-  .s.on .frag:not(.shown) { opacity: 0; transform: translateY(8px); }
+  .s.on .frag:not(.shown) { opacity: 0; }
 
   /* ---------- Bottom Progress Bar ---------- */
   .prog { position: fixed; left: 0; bottom: 0; height: 4px; background: var(--accent); width: 0; transition: width .5s ease; z-index: 30; }
@@ -920,7 +1346,7 @@
       
       <!-- Top College Header with Logo (Bigger CIT Logo) -->
       <div class="cit-header-box">
-        <img src="images/cit.png" alt="CIT College Logo" class="cit-logo">
+        <img src="cit.png" alt="CIT College Logo" class="cit-logo">
         <div>
           <div class="cit-college-title">Coimbatore Institute of Technology</div>
           <div class="cit-college-sub">(Government Aided Autonomous Institution affiliated to Anna University)</div>
@@ -994,9 +1420,9 @@
         <div class="cit-template-card orange-bar">
           <div class="cit-card-header">PROBLEM STATEMENT</div>
           <div class="cit-card-list">
-            <div>• <b>Access Barrier:</b> Routine health screening requires multiple specialized devices & clinical tests, making frequent checkups difficult in rural communities.</div>
-            <div>• <b>Unused Smartphone Sensors:</b> Smartphones capture rich camera, microphone, & motion data, but these signals are rarely combined for holistic screening.</div>
-            <div>• <b>Multi-Modal AI Gap:</b> Need an integrated AI system to fuse facial, eye, voice, & cough signals to track health baselines without extra devices.</div>
+            <div>• <b>Limited Screening Access:</b> Frequent health monitoring is difficult where medical equipment and healthcare professionals are not readily available.</div>
+            <div>• <b>Untapped Smartphone Potential:</b> A smartphone can capture facial, eye, voice, cough, and movement signals, but these capabilities remain largely fragmented.</div>
+            <div>• <b>No Personal Health Baseline:</b> Existing solutions often measure isolated parameters rather than continuously identifying meaningful changes from an individual's normal health pattern.</div>
           </div>
         </div>
 
@@ -1055,7 +1481,7 @@
           </div>
           
           <div class="cit-card-img-box" style="flex:1; width:100%; margin-top:14px; padding:6px; border-radius:12px; background:#FFF">
-            <img src="images/Screenshot_2026-08-17_050005.png" alt="Personal Medical Devices" style="object-fit:contain; width:100%; height:100%; border-radius:8px">
+            <img src="Screenshot_2026-08-17_050005.png" alt="Personal Medical Devices" style="object-fit:contain; width:100%; height:100%; border-radius:8px">
           </div>
         </div>
 
@@ -1071,28 +1497,28 @@
           
           <div class="brand-logo-grid" style="flex:1; margin-top:14px; gap:10px; grid-template-rows: 1fr 1fr">
             <div class="brand-logo-card" style="height:100%; padding:8px 12px">
-              <img src="images/apple_watch.png" alt="Apple Health" class="brand-logo-img" style="width:34px; height:34px">
+              <img src="apple_watch.png" alt="Apple Health" class="brand-logo-img" style="width:34px; height:34px">
               <div class="brand-logo-info">
                 <span class="brand-logo-title" style="font-size:13px">Apple Health</span>
                 <span class="brand-logo-sub" style="font-size:10.5px">Face / Watch Pulse</span>
               </div>
             </div>
             <div class="brand-logo-card" style="height:100%; padding:8px 12px">
-              <img src="images/tobii.png" alt="Tobii AI" class="brand-logo-img" style="width:34px; height:34px">
+              <img src="tobii.png" alt="Tobii AI" class="brand-logo-img" style="width:34px; height:34px">
               <div class="brand-logo-info">
                 <span class="brand-logo-title" style="font-size:13px">Tobii AI</span>
                 <span class="brand-logo-sub" style="font-size:10.5px">Eye & Gaze Tracking</span>
               </div>
             </div>
             <div class="brand-logo-card" style="height:100%; padding:8px 12px">
-              <img src="images/empatica.png" alt="Empatica E4" class="brand-logo-img" style="width:34px; height:34px">
+              <img src="empatica.png" alt="Empatica E4" class="brand-logo-img" style="width:34px; height:34px">
               <div class="brand-logo-info">
                 <span class="brand-logo-title" style="font-size:13px">Empatica E4</span>
                 <span class="brand-logo-sub" style="font-size:10.5px">Speech & Stress Bio</span>
               </div>
             </div>
             <div class="brand-logo-card" style="height:100%; padding:8px 12px">
-              <img src="images/vitalo.jpg" alt="VitaloJAK" class="brand-logo-img" style="width:34px; height:34px">
+              <img src="vitalo.jpg" alt="VitaloJAK" class="brand-logo-img" style="width:34px; height:34px">
               <div class="brand-logo-info">
                 <span class="brand-logo-title" style="font-size:13px">VitaloJAK</span>
                 <span class="brand-logo-sub" style="font-size:10.5px">Cough Audio Monitor</span>
@@ -1111,7 +1537,7 @@
             </div>
           </div>
           <div class="cit-card-img-box" style="flex:1; width:100%; margin-top:14px; padding:12px; border-color:var(--accent); background:#FFF">
-            <img src="images/logo.jpeg" alt="CareFor Official Brand Logo" style="width:100%; height:100%; object-fit:contain">
+            <img src="logo.jpeg" alt="CareFor Official Brand Logo" style="width:100%; height:100%; object-fit:contain">
           </div>
         </div>
 
@@ -1128,106 +1554,200 @@
         <p class="lead-q">Present the idea in one glance: input → intelligence → action → outcome.</p>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:14px;flex:1">
+      <!-- Layout: Video Left (Fades in & stays) + 4 Straight Line Fragment Cards Right -->
+      <div class="slide4-layout">
         
-        <!-- Track 1: Face Scan (rPPG) -->
-        <div class="cit-template-card orange-bar" style="justify-content:space-between">
-          <div>
-            <div class="cit-card-header" style="font-size:14px">TRACK 01 // CAMERA</div>
-            <div style="font-weight:800;font-size:18.5px;color:#082752;margin-top:2px">❤️ Face Scan</div>
-            <div class="slide4-bullet-list">
-              <div>• <b>Simple Camera Video:</b> Reads light absorption on facial skin.</div>
-              <div>• <b>Blood Pulse Tracking:</b> Captures micro skin color changes each heartbeat.</div>
-              <div>• <b>Vital Signs Output:</b> Calculates Pulse, SpO2 %, HRV & Respiration.</div>
-            </div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">📷 INPUT SENSOR</div>
-            <div class="slide4-section-text">Smartphone Camera</div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">⚙️ CORE TECH</div>
-            <div class="slide4-section-text" style="color:#F36914">Google MediaPipe + rPPG + DSP</div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">📊 OUTPUT VITALS</div>
-            <div class="slide4-section-text">Pulse Rate, SpO2 %, HRV, Breaths</div>
-          </div>
+        <!-- Left Side: Face Scan Video Only -->
+        <div class="slide4-video-box">
+          <video src="Face scan.mp4" autoplay loop muted playsinline class="slide4-video-el"></video>
         </div>
 
-        <!-- Track 2: Eye Scan -->
-        <div class="cit-template-card blue-bar frag" style="justify-content:space-between">
-          <div>
-            <div class="cit-card-header" style="font-size:14px">TRACK 02 // CAMERA</div>
-            <div style="font-weight:800;font-size:18.5px;color:#082752;margin-top:2px">👁️ Eye Scan</div>
-            <div class="slide4-bullet-list">
-              <div>• <b>Pupil & Iris Lock:</b> Focuses camera on upper face and eyes.</div>
-              <div>• <b>Blink & Gaze Tracking:</b> Measures eyelid closure speed and gaze hold.</div>
-              <div>• <b>Fatigue Scores:</b> Calculates Drowsiness % and Attention Focus %.</div>
+        <!-- Right Side: Accordion Track Line Cards -->
+        <div class="slide4-accordion" id="slide4Accordion">
+          
+          <!-- Track 1: Face Scan -->
+          <div class="slide4-track-item orange-bar active" data-index="0">
+            <div class="slide4-strip-label">
+              <span class="slide4-strip-num">01</span>
+              <span class="slide4-strip-title">FACE SCAN</span>
+            </div>
+            <div class="slide4-card-content cit-template-card orange-bar">
+              <div>
+                <div class="cit-card-header" style="font-size:14px">TRACK 01 // CAMERA</div>
+                <div style="font-weight:800;font-size:22px;color:#082752;margin-top:4px;margin-bottom:10px">Face Scan</div>
+                <div class="slide4-bullet-list">
+                  <div>• <b>Camera Video:</b> Reads light absorption on facial skin in real time.</div>
+                  <div>• <b>Blood Pulse Tracking:</b> Captures micro skin color changes each heartbeat.</div>
+                  <div>• <b>Vital Signs Output:</b> Calculates Pulse Rate (BPM), SpO2 %, HRV & Respiration.</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:12px; margin-top:auto">
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">INPUT SENSOR</div>
+                  <div class="slide4-section-text">Smartphone Camera</div>
+                </div>
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">CORE TECH</div>
+                  <div class="slide4-section-text" style="color:#F36914">MediaPipe + rPPG + DSP</div>
+                </div>
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">OUTPUT VITALS</div>
+                  <div class="slide4-section-text">Pulse Rate, SpO2 %, HRV, Breaths</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">📷 INPUT SENSOR</div>
-            <div class="slide4-section-text">Smartphone Camera</div>
+
+          <!-- Track 2: Eye Scan -->
+          <div class="slide4-track-item blue-bar" data-index="1">
+            <div class="slide4-strip-label">
+              <span class="slide4-strip-num">02</span>
+              <span class="slide4-strip-title">EYE SCAN</span>
+            </div>
+            <div class="slide4-card-content cit-template-card blue-bar">
+              <div>
+                <div class="cit-card-header" style="font-size:14px">TRACK 02 // CAMERA</div>
+                <div style="font-weight:800;font-size:22px;color:#082752;margin-top:4px;margin-bottom:10px">Eye Scan</div>
+                <div class="slide4-bullet-list">
+                  <div>• <b>Pupil & Iris Lock:</b> Focuses camera on upper face and eye landmarks.</div>
+                  <div>• <b>Blink & Gaze Tracking:</b> Measures eyelid closure speed and gaze hold.</div>
+                  <div>• <b>Fatigue Scores:</b> Calculates Drowsiness % & Attention Focus %.</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:12px; margin-top:auto">
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">INPUT SENSOR</div>
+                  <div class="slide4-section-text">Smartphone Camera</div>
+                </div>
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">CORE TECH</div>
+                  <div class="slide4-section-text" style="color:#1858A4">MediaPipe Iris Tracker</div>
+                </div>
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">OUTPUT SCORES</div>
+                  <div class="slide4-section-text">Drowsiness % & Focus Score %</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">⚙️ CORE TECH</div>
-            <div class="slide4-section-text" style="color:#1858A4">MediaPipe Iris Landmark Tracker</div>
+
+          <!-- Track 3: Speech Scan -->
+          <div class="slide4-track-item green-bar" data-index="2">
+            <div class="slide4-strip-label">
+              <span class="slide4-strip-num">03</span>
+              <span class="slide4-strip-title">SPEECH SCAN</span>
+            </div>
+            <div class="slide4-card-content cit-template-card green-bar">
+              <div>
+                <div class="cit-card-header" style="font-size:14px">TRACK 03 // MICROPHONE</div>
+                <div style="font-weight:800;font-size:22px;color:#082752;margin-top:4px;margin-bottom:10px">Speech Scan</div>
+                <div class="slide4-bullet-list">
+                  <div>• <b>5-Second Voice Record:</b> User speaks a short sentence into phone mic.</div>
+                  <div>• <b>Vocal Tremble Analysis:</b> Filters room noise to measure pitch wobble.</div>
+                  <div>• <b>Stress & Stability:</b> Scores vocal cord tension and lung airflow.</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:12px; margin-top:auto">
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">INPUT SENSOR</div>
+                  <div class="slide4-section-text">Smartphone Microphone</div>
+                </div>
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">CORE TECH</div>
+                  <div class="slide4-section-text" style="color:#26915F">Voice VAD + Pitch DSP</div>
+                </div>
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">OUTPUT SCORES</div>
+                  <div class="slide4-section-text">Stress % & Voice Stability</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">📊 OUTPUT SCORES</div>
-            <div class="slide4-section-text">😴 Drowsiness % & 🎯 Focus Score %</div>
+
+          <!-- Track 4: Cough Scan -->
+          <div class="slide4-track-item navy-bar" data-index="3">
+            <div class="slide4-strip-label">
+              <span class="slide4-strip-num">04</span>
+              <span class="slide4-strip-title">COUGH SCAN</span>
+            </div>
+            <div class="slide4-card-content cit-template-card navy-bar">
+              <div>
+                <div class="cit-card-header" style="font-size:14px">TRACK 04 // MICROPHONE</div>
+                <div style="font-weight:800;font-size:22px;color:#082752;margin-top:4px;margin-bottom:10px">Cough Scan</div>
+                <div class="slide4-bullet-list">
+                  <div>• <b>2 Cough Bursts:</b> Captures cough sound waves into phone mic.</div>
+                  <div>• <b>Sound Spectrograms:</b> Converts 1D audio into 2D frequency images.</div>
+                  <div>• <b>Airway Classification:</b> Identifies Dry vs Wet cough & Airway Strain.</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:12px; margin-top:auto">
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">INPUT SENSOR</div>
+                  <div class="slide4-section-text">Smartphone Microphone</div>
+                </div>
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">CORE TECH</div>
+                  <div class="slide4-section-text" style="color:#082752">Spectrogram + Audio AI</div>
+                </div>
+                <div class="slide4-section-badge" style="flex:1">
+                  <div class="slide4-section-title">OUTPUT SCORES</div>
+                  <div class="slide4-section-text">Airway Strain % & Dry/Wet</div>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
 
-        <!-- Track 3: Speech Scan -->
-        <div class="cit-template-card green-bar frag" style="justify-content:space-between">
-          <div>
-            <div class="cit-card-header" style="font-size:14px">TRACK 03 // MICROPHONE</div>
-            <div style="font-weight:800;font-size:18.5px;color:#082752;margin-top:2px">🎙️ Speech Scan</div>
-            <div class="slide4-bullet-list">
-              <div>• <b>5-Second Voice Record:</b> User speaks a short sentence into phone mic.</div>
-              <div>• <b>Vocal Tremble Analysis:</b> Filters room noise to measure pitch wobble.</div>
-              <div>• <b>Stress & Stability:</b> Scores vocal cord tension and lung airflow.</div>
-            </div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">🎙️ INPUT SENSOR</div>
-            <div class="slide4-section-text">Smartphone Microphone</div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">⚙️ CORE TECH</div>
-            <div class="slide4-section-text" style="color:#26915F">Voice VAD + Acoustic Pitch DSP</div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">📊 OUTPUT SCORES</div>
-            <div class="slide4-section-text">😰 Stress Level % & 🫁 Voice Stability</div>
-          </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SLIDE: Research Evidence ==================== -->
+  <section class="s" data-title="Research Evidence">
+    <div class="wrap">
+      <div>
+        <div class="kicker">RESEARCH EVIDENCE</div>
+        <h2>Research Evidence</h2>
+        <p class="lead-q">CareFor is built on existing research, not assumptions.</p>
+      </div>
+
+      <!-- Research Evidence 3-Column Structured Table -->
+      <div class="research-table-container">
+        
+        <!-- Table Header -->
+        <div class="research-table-header">
+          <div>MODALITY</div>
+          <div>RESEARCH SHOWS</div>
+          <div>OUR APPROACH</div>
         </div>
 
-        <!-- Track 4: Cough Scan -->
-        <div class="cit-template-card navy-bar frag" style="justify-content:space-between">
-          <div>
-            <div class="cit-card-header" style="font-size:14px">TRACK 04 // MICROPHONE</div>
-            <div style="font-weight:800;font-size:18.5px;color:#082752;margin-top:2px">😮‍💨 Cough Scan</div>
-            <div class="slide4-bullet-list">
-              <div>• <b>2 Cough Bursts:</b> Captures cough sound waves into phone mic.</div>
-              <div>• <b>Sound Spectrograms:</b> Converts 1D audio into 2D frequency images.</div>
-              <div>• <b>Airway Classification:</b> Identifies Dry vs Wet cough & Airway Strain.</div>
-            </div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">🎙️ INPUT SENSOR</div>
-            <div class="slide4-section-text">Smartphone Microphone</div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">⚙️ CORE TECH</div>
-            <div class="slide4-section-text" style="color:#082752">Sound Spectrogram + Audio AI</div>
-          </div>
-          <div class="slide4-section-badge">
-            <div class="slide4-section-title">📊 OUTPUT SCORES</div>
-            <div class="slide4-section-text">🫁 Airway Strain % & 🌵 Dry / Wet</div>
-          </div>
+        <!-- Row 1: Face / rPPG -->
+        <div class="research-table-row orange-bar frag">
+          <div class="research-modality">Face / rPPG</div>
+          <div class="research-shows">Facial video can capture pulse-related physiological changes.</div>
+          <div class="research-approach orange">POS/CHROM + Signal Processing</div>
+        </div>
+
+        <!-- Row 2: Eye Tracking -->
+        <div class="research-table-row blue-bar frag">
+          <div class="research-modality">Eye Tracking</div>
+          <div class="research-shows">Eye movements and blinking can provide measurable behavioral and neurological indicators.</div>
+          <div class="research-approach blue">MediaPipe Iris + Temporal Analysis</div>
+        </div>
+
+        <!-- Row 3: Voice Analysis -->
+        <div class="research-table-row green-bar frag">
+          <div class="research-modality">Voice Analysis</div>
+          <div class="research-shows">Vocal characteristics can act as digital biomarkers for health-related conditions.</div>
+          <div class="research-approach green">MFCC + Acoustic Features + ML</div>
+        </div>
+
+        <!-- Row 4: Cough Analysis -->
+        <div class="research-table-row navy-bar frag">
+          <div class="research-modality">Cough Analysis</div>
+          <div class="research-shows">Cough acoustics contain patterns useful for respiratory screening.</div>
+          <div class="research-approach navy">Mel-Spectrogram + CNN</div>
         </div>
 
       </div>
@@ -1239,7 +1759,7 @@
     <div class="wrap">
       <div>
         <div class="kicker">05 &nbsp; CORE INNOVATION</div>
-         baseline health tracking.
+        <h2>Core Technical Innovation</h2>
         <p class="lead-q">What makes CareFor uniquely breakthrough compared to traditional devices and single-signal apps.</p>
       </div>
 
@@ -1250,7 +1770,7 @@
         <div class="cit-template-card orange-bar">
           <div>
             <div class="cit-card-header">PILLAR 01 // ACCESSIBILITY</div>
-            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">📱 $0 Extra Hardware</div>
+            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">$0 Extra Hardware</div>
             <div class="cit-card-list" style="margin-top:12px">
               <div>• <b>Standard Phone Sensors:</b> Uses built-in RGB camera & microphone only.</div>
               <div>• <b>Replaces Small Gadgets:</b> Eliminates smartwatches, pulse oximeters, & digital stethoscopes.</div>
@@ -1263,7 +1783,7 @@
         <div class="cit-template-card blue-bar frag">
           <div>
             <div class="cit-card-header">PILLAR 02 // MULTI-MODAL AI</div>
-            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">🔀 4-Scan AI Fusion</div>
+            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">4-Scan AI Fusion</div>
             <div class="cit-card-list" style="margin-top:12px">
               <div>• <b>Full-Body Signal Fusion:</b> Fuses facial skin, eye gaze, speech acoustics, & cough audio.</div>
               <div>• <b>Advanced AI Engines:</b> MediaPipe + rPPG + DSP + Audio Mel-Spectrogram CNN.</div>
@@ -1276,7 +1796,7 @@
         <div class="cit-template-card green-bar frag">
           <div>
             <div class="cit-card-header">PILLAR 03 // ACTIONABLE CARE</div>
-            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">🤖 Healio AI Assistant</div>
+            <div style="font-weight:800;font-size:20px;color:#082752;margin-top:4px">Healio AI Assistant</div>
             <div class="cit-card-list" style="margin-top:12px">
               <div>• <b>Plain Health Guidance:</b> RAG medical chatbot translates numbers into easy advice.</div>
               <div>• <b>Persistent Health Log:</b> Automatically tracks daily, weekly, & monthly vital trends.</div>
@@ -1308,7 +1828,7 @@
       </div>
 
       <!-- 5 Stages Grid filling height completely -->
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:12px;margin-bottom:12px;flex:1">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:0;margin-bottom:12px;flex:1">
         
         <!-- Stage 1: Input -->
         <div class="cit-template-card orange-bar" style="padding: clamp(16px,1.5vw,22px); justify-content: space-between;">
@@ -1399,7 +1919,7 @@
 
       <!-- High-Res Generated System Architecture Diagram Banner -->
       <div class="arch-img-banner">
-        <img src="images/carefor_unified_architecture.jpg" alt="Technology and System Architecture Diagram (Unified 4 Scans + FastAPI + Healio RAG AI)">
+        <img src="carefor_unified_architecture.jpg" alt="Technology and System Architecture Diagram (Unified 4 Scans + FastAPI + Healio RAG AI)">
       </div>
 
     </div>
@@ -1414,7 +1934,7 @@
         <p class="lead-q">Unified stack powering 4-track AI signal ingestion, backend storage, and Healio RAG AI.</p>
       </div>
       
-      <div style="margin-top:12px;flex:1;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="margin-top:0;flex:1;display:flex;flex-direction:column;justify-content:space-between">
         
         <!-- Section 1: BACKEND (Green Header Bar) -->
         <div class="ts-section-container">
@@ -1424,7 +1944,7 @@
             <div class="ts-card">
               <div class="ts-card-top">
                 <div class="ts-icon-box">
-                  <img src="images/fastapi.png" alt="FastAPI Logo" class="ts-logo-img">
+                  <img src="fastapi.png" alt="FastAPI Logo" class="ts-logo-img">
                 </div>
                 <div>
                   <div class="ts-title">REST API</div>
@@ -1437,7 +1957,7 @@
             <div class="ts-card">
               <div class="ts-card-top">
                 <div class="ts-icon-box">
-                  <img src="images/postgresql.png" alt="PostgreSQL Logo" class="ts-logo-img">
+                  <img src="postgresql.png" alt="PostgreSQL Logo" class="ts-logo-img">
                 </div>
                 <div>
                   <div class="ts-title">PostgreSQL</div>
@@ -1449,7 +1969,7 @@
             <div class="ts-card">
               <div class="ts-card-top">
                 <div class="ts-icon-box">
-                  <img src="images/pydantic.png" alt="Pydantic Logo" class="ts-logo-img">
+                  <img src="pydantic.png" alt="Pydantic Logo" class="ts-logo-img">
                 </div>
                 <div>
                   <div class="ts-title">Pydantic</div>
@@ -1472,7 +1992,7 @@
             <div class="ts-card">
               <div class="ts-card-top">
                 <div class="ts-icon-box">
-                  <img src="images/python.jpg" alt="Python Logo" class="ts-logo-img">
+                  <img src="python.jpg" alt="Python Logo" class="ts-logo-img">
                 </div>
                 <div>
                   <div class="ts-title">Python</div>
@@ -1491,7 +2011,7 @@
             <div class="ts-card">
               <div class="ts-card-top">
                 <div class="ts-icon-box">
-                  <img src="images/flutter.png" alt="Flutter Logo" class="ts-logo-img">
+                  <img src="flutter.png" alt="Flutter Logo" class="ts-logo-img">
                 </div>
                 <div>
                   <div class="ts-title">Flutter</div>
@@ -1503,7 +2023,7 @@
             <div class="ts-card">
               <div class="ts-card-top">
                 <div class="ts-icon-box">
-                  <img src="images/dart.jpg" alt="Dart Logo" class="ts-logo-img">
+                  <img src="dart.jpg" alt="Dart Logo" class="ts-logo-img">
                 </div>
                 <div>
                   <div class="ts-title">Dart</div>
@@ -1515,7 +2035,7 @@
             <div class="ts-card">
               <div class="ts-card-top">
                 <div class="ts-icon-box">
-                  <img src="images/and.png" alt="Android Logo" class="ts-logo-img">
+                  <img src="and.png" alt="Android Logo" class="ts-logo-img">
                 </div>
                 <div>
                   <div class="ts-title">Android SDK</div>
@@ -1801,7 +2321,7 @@
 
       <!-- Right Logo Card Box -->
       <div style="width:clamp(220px, 24vw, 330px); height:clamp(220px, 24vw, 330px); border-radius:32px; background:#FFFFFF; display:flex; align-items:center; justify-content:center; padding:clamp(24px, 2.5vw, 40px); box-shadow:0 20px 50px rgba(0,0,0,0.3); flex:none">
-        <img src="images/logo.jpeg" alt="CareFor Official Brand Logo" style="width:100%; height:100%; object-fit:contain">
+        <img src="logo.jpeg" alt="CareFor Official Brand Logo" style="width:100%; height:100%; object-fit:contain">
       </div>
 
     </div>
@@ -1823,6 +2343,36 @@
     
     let cur = 0;
     const tot = slides.length;
+
+    // Slide 4 Accordion Track Controller
+    let slide4ActiveTrack = 0;
+    const slide4Tracks = Array.from(document.querySelectorAll('.slide4-track-item'));
+
+    function setSlide4Track(idx) {
+      if (!slide4Tracks || slide4Tracks.length === 0) return;
+      if (idx < 0) idx = 0;
+      if (idx >= slide4Tracks.length) idx = slide4Tracks.length - 1;
+      
+      slide4Tracks.forEach((tr, i) => {
+        if (i === idx) {
+          tr.classList.add('active');
+          tr.classList.remove('just-expanded');
+          void tr.offsetWidth; // reflow to trigger wipe animation
+          tr.classList.add('just-expanded');
+        } else {
+          tr.classList.remove('active');
+          tr.classList.remove('just-expanded');
+        }
+      });
+      slide4ActiveTrack = idx;
+    }
+
+    slide4Tracks.forEach((tr, i) => {
+      tr.addEventListener('click', (evt) => {
+        evt.stopPropagation();
+        setSlide4Track(i);
+      });
+    });
 
     function updateSlide(idx) {
       if (idx < 0) idx = 0;
@@ -1851,11 +2401,23 @@
       } else {
         document.body.classList.remove('on-divider');
       }
+
+      if (slides[cur].getAttribute('data-title') && slides[cur].getAttribute('data-title').includes('04')) {
+        setSlide4Track(0);
+      }
     }
 
     // Stepwise Fragment Reveal using > (Right Arrow or Space)
     function revealNextFragment() {
       const activeSlide = slides[cur];
+      if (activeSlide && activeSlide.getAttribute('data-title') && activeSlide.getAttribute('data-title').includes('04')) {
+        if (slide4ActiveTrack < slide4Tracks.length - 1) {
+          setSlide4Track(slide4ActiveTrack + 1);
+          return true;
+        }
+        return false;
+      }
+
       const unrevealed = activeSlide.querySelectorAll('.frag:not(.shown)');
       if (unrevealed.length > 0) {
         unrevealed[0].classList.add('shown');
@@ -1866,6 +2428,14 @@
 
     function hideLastFragment() {
       const activeSlide = slides[cur];
+      if (activeSlide && activeSlide.getAttribute('data-title') && activeSlide.getAttribute('data-title').includes('04')) {
+        if (slide4ActiveTrack > 0) {
+          setSlide4Track(slide4ActiveTrack - 1);
+          return true;
+        }
+        return false;
+      }
+
       const revealedList = activeSlide.querySelectorAll('.frag.shown');
       if (revealedList.length > 0) {
         revealedList[revealedList.length - 1].classList.remove('shown');
@@ -1894,7 +2464,7 @@
 
     // Touch & Click Support
     document.addEventListener('click', (e) => {
-      if (e.target.closest('#spine') || e.target.closest('.rail')) return;
+      if (e.target.closest('#spine') || e.target.closest('.rail') || e.target.closest('.slide4-track-item')) return;
       if (e.clientX > window.innerWidth * 0.75) {
         if (!revealNextFragment()) updateSlide(cur + 1);
       } else if (e.clientX < window.innerWidth * 0.25) {
