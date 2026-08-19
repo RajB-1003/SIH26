@@ -1609,9 +1609,9 @@
                 <div class="cit-card-header" style="font-size:14px">TRACK 02 // CAMERA</div>
                 <div style="font-weight:800;font-size:22px;color:#082752;margin-top:4px;margin-bottom:10px">Eye Scan</div>
                 <div class="slide4-bullet-list">
-                  <div>• <b>Pupil & Iris Lock:</b> Focuses camera on upper face and eye landmarks.</div>
-                  <div>• <b>Blink & Gaze Tracking:</b> Measures eyelid closure speed and gaze hold.</div>
-                  <div>• <b>Fatigue Scores:</b> Calculates Drowsiness % & Attention Focus %.</div>
+                  <div>• <b>ROI Segmentation & Lock:</b> Isolates palpebral conjunctiva (inner eyelid) and sclera (white of eye).</div>
+                  <div>• <b>Chromatic Biomarker Extraction:</b> Measures redness (a* channel) for Hemoglobin levels and yellowness (b* channel) for Bilirubin buildup.</div>
+                  <div>• <b>Systemic Risk Scoring:</b> Calculates Anemia Risk Index & Neonatal/Hepatic Jaundice Index.</div>
                 </div>
               </div>
               <div style="display:flex; gap:12px; margin-top:auto">
@@ -1621,11 +1621,11 @@
                 </div>
                 <div class="slide4-section-badge" style="flex:1">
                   <div class="slide4-section-title">CORE TECH</div>
-                  <div class="slide4-section-text" style="color:#1858A4">MediaPipe Iris Tracker</div>
+                  <div class="slide4-section-text" style="color:#1858A4">MediaPipe + CIE L*a*b* Extraction</div>
                 </div>
                 <div class="slide4-section-badge" style="flex:1">
                   <div class="slide4-section-title">OUTPUT SCORES</div>
-                  <div class="slide4-section-text">Drowsiness % & Focus Score %</div>
+                  <div class="slide4-section-text">Anemia Risk % & Jaundice Index</div>
                 </div>
               </div>
             </div>
@@ -1642,9 +1642,9 @@
                 <div class="cit-card-header" style="font-size:14px">TRACK 03 // MICROPHONE</div>
                 <div style="font-weight:800;font-size:22px;color:#082752;margin-top:4px;margin-bottom:10px">Speech Scan</div>
                 <div class="slide4-bullet-list">
-                  <div>• <b>5-Second Voice Record:</b> User speaks a short sentence into phone mic.</div>
-                  <div>• <b>Vocal Tremble Analysis:</b> Filters room noise to measure pitch wobble.</div>
-                  <div>• <b>Stress & Stability:</b> Scores vocal cord tension and lung airflow.</div>
+                  <div>• <b>Sustained Phonation & Passage:</b> Captures standard vocalization to track post-arrest neuromotor and pulmonary recovery.</div>
+                  <div>• <b>Acoustic Stability & Articulation:</b> Analyzes pitch perturbation (Jitter/Shimmer) and speech dysarthria from cerebral hypoxia.</div>
+                  <div>• <b>Cardiorespiratory Speech Index:</b> Scores subglottic breath pressure, phonation duration, and motor speech recovery.</div>
                 </div>
               </div>
               <div style="display:flex; gap:12px; margin-top:auto">
@@ -1654,11 +1654,11 @@
                 </div>
                 <div class="slide4-section-badge" style="flex:1">
                   <div class="slide4-section-title">CORE TECH</div>
-                  <div class="slide4-section-text" style="color:#26915F">Voice VAD + Pitch DSP</div>
+                  <div class="slide4-section-text" style="color:#26915F">Voice DSP (YIN / MFCC) + Acoustic Classifier</div>
                 </div>
                 <div class="slide4-section-badge" style="flex:1">
                   <div class="slide4-section-title">OUTPUT SCORES</div>
-                  <div class="slide4-section-text">Stress % & Voice Stability</div>
+                  <div class="slide4-section-text">Post-Arrest Recovery Score & Neuromotor Stability</div>
                 </div>
               </div>
             </div>
